@@ -1,0 +1,2607 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CreatorOS — Final</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050507;--surface:#0D0D12;--card:#111118;--border:#1E1E2A;
+  --red:#FF3131;--red-dim:rgba(255,49,49,0.12);--yellow:#FFD000;
+  --green:#00E87A;--blue:#3D9EFF;--purple:#A855F7;--orange:#FF8C00;
+  --text:#E2E2F0;--muted:#555568;
+  --mono:'IBM Plex Mono',monospace;--display:'Bebas Neue',sans-serif;--body:'DM Sans',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);pointer-events:none;z-index:9999;}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh;}
+/* SIDEBAR */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.brand{padding:0 18px 20px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.brand-icon{width:38px;height:38px;background:var(--red);clip-path:polygon(0 0,100% 0,100% 80%,80% 100%,0 100%);display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:8px;}
+.brand h1{font-family:var(--display);font-size:20px;letter-spacing:2px;}
+.brand h1 span{color:var(--red);}
+.brand p{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;margin-top:3px;}
+.nav-section{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;padding:10px 18px 4px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all 0.15s;border-left:2px solid transparent;white-space:nowrap;}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+.nav-item.active{color:var(--red);border-left-color:var(--red);background:var(--red-dim);}
+.nav-item .data-badge{margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;background:rgba(0,232,122,0.15);color:var(--green);}
+.nav-item .est-badge{margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;background:rgba(255,208,0,0.15);color:var(--yellow);}
+.sidebar-footer{margin-top:auto;padding:14px 18px;border-top:1px solid var(--border);}
+.algo-status{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--green);}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+/* MAIN */
+.main{padding:24px;overflow-y:auto;}
+.panel{display:none;animation:fadeIn 0.25s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+/* PAGE HEADER */
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
+.page-hdr h2{font-family:var(--display);font-size:32px;letter-spacing:2px;line-height:1;}
+.page-hdr p{font-size:12px;color:var(--muted);margin-top:5px;}
+/* DATA SOURCE INDICATOR */
+.ds-indicator{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:3px;margin-bottom:14px;}
+.ds-live{background:rgba(0,232,122,0.12);color:var(--green);border:1px solid rgba(0,232,122,0.3);}
+.ds-ai{background:rgba(255,208,0,0.12);color:var(--yellow);border:1px solid rgba(255,208,0,0.3);}
+.ds-mixed{background:rgba(61,158,255,0.12);color:var(--blue);border:1px solid rgba(61,158,255,0.3);}
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);padding:18px;border-radius:4px;transition:border-color 0.2s;}
+.card:hover{border-color:rgba(255,49,49,0.3);}
+.info-card{background:var(--card);border:1px solid var(--border);padding:18px;border-radius:4px;}
+.info-card h3{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.setup-card{background:var(--card);border:1px solid var(--border);padding:20px;border-radius:4px;margin-bottom:14px;}
+.setup-card h3{font-size:14px;font-weight:700;margin-bottom:6px;}
+.setup-card p{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+/* STATS */
+.stat{background:var(--card);border:1px solid var(--border);padding:14px;border-radius:4px;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat.red::before{background:var(--red);}
+.stat.green::before{background:var(--green);}
+.stat.blue::before{background:var(--blue);}
+.stat.yellow::before{background:var(--yellow);}
+.stat.purple::before{background:var(--purple);}
+.stat.orange::before{background:var(--orange);}
+.stat-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.stat-val{font-family:var(--display);font-size:32px;letter-spacing:1px;line-height:1;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+/* INPUTS */
+.input-field{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 12px;border-radius:4px;outline:none;transition:border-color 0.2s;width:100%;}
+.input-field:focus{border-color:var(--red);}
+.input-field::placeholder{color:var(--muted);}
+.input-row{display:flex;gap:8px;margin-bottom:10px;}
+/* BUTTONS */
+.btn{padding:9px 18px;border:none;cursor:pointer;font-family:var(--body);font-size:12px;font-weight:700;border-radius:4px;transition:all 0.15s;white-space:nowrap;}
+.btn-red{background:var(--red);color:white;}
+.btn-red:hover{opacity:0.85;transform:translateY(-1px);}
+.btn-yellow{background:var(--yellow);color:#000;}
+.btn-yellow:hover{opacity:0.85;}
+.btn-green{background:var(--green);color:#000;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-outline:hover{border-color:var(--red);color:var(--red);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none!important;}
+/* BADGES */
+.badge{font-family:var(--mono);font-size:9px;padding:3px 7px;border-radius:2px;letter-spacing:1px;display:inline-block;}
+.b-red{background:rgba(255,49,49,0.2);color:var(--red);border:1px solid rgba(255,49,49,0.4);}
+.b-green{background:rgba(0,232,122,0.15);color:var(--green);border:1px solid rgba(0,232,122,0.3);}
+.b-yellow{background:rgba(255,208,0,0.15);color:var(--yellow);border:1px solid rgba(255,208,0,0.3);}
+.b-blue{background:rgba(61,158,255,0.15);color:var(--blue);border:1px solid rgba(61,158,255,0.3);}
+.b-purple{background:rgba(168,85,247,0.15);color:var(--purple);border:1px solid rgba(168,85,247,0.3);}
+/* ALERTS */
+.alert{padding:10px 14px;border-radius:4px;margin-bottom:8px;font-size:12px;line-height:1.5;display:flex;gap:8px;align-items:flex-start;}
+.alert-red{background:rgba(255,49,49,0.1);border:1px solid rgba(255,49,49,0.3);}
+.alert-yellow{background:rgba(255,208,0,0.1);border:1px solid rgba(255,208,0,0.3);}
+.alert-green{background:rgba(0,232,122,0.1);border:1px solid rgba(0,232,122,0.3);}
+.alert-blue{background:rgba(61,158,255,0.1);border:1px solid rgba(61,158,255,0.3);}
+/* AI RESPONSE */
+.ai-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--red);padding:14px;border-radius:0 4px 4px 0;font-size:13px;line-height:1.8;color:#ccc;white-space:pre-wrap;min-height:60px;}
+.ai-box.loading::after{content:'';display:inline-block;width:7px;height:13px;background:var(--red);margin-left:3px;animation:cur 0.8s infinite;}
+@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
+/* SCORE BARS */
+.score-bar{margin-bottom:8px;}
+.score-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;}
+.score-label span:first-child{color:var(--muted);}
+.bar-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+/* TREND ROWS */
+.trend-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.trend-row:last-child{border-bottom:none;}
+.trend-num{font-family:var(--display);font-size:26px;color:var(--border);min-width:34px;line-height:1;}
+.trend-num.hot{color:var(--red);}
+/* NOTIF */
+.notif{display:flex;gap:10px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:4px;margin-bottom:8px;}
+.notif-dot{width:7px;height:7px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.notif-body h4{font-size:12px;font-weight:700;margin-bottom:2px;}
+.notif-body p{font-size:11px;color:var(--muted);line-height:1.5;}
+.notif-time{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:3px;}
+/* SPINNER */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* DROP ZONE */
+.drop-zone{border:2px dashed var(--border);border-radius:6px;padding:32px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--surface);}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--red);background:var(--red-dim);}
+/* DIVIDER */
+hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:12px;}
+.data-table th{text-align:left;padding:7px 10px;font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;border-bottom:1px solid var(--border);}
+.data-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+.data-table tr:last-child td{border-bottom:none;}
+/* REVENUE METER */
+.rev-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:4px;}
+.rev-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green),var(--yellow));}
+/* AB TEST */
+.ab-slot{border:2px dashed var(--border);border-radius:6px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.ab-slot:hover{border-color:var(--red);}
+.ab-slot img{max-width:100%;border-radius:4px;max-height:120px;object-fit:cover;}
+.ab-winner{border-color:var(--green)!important;background:rgba(0,232,122,0.05);}
+.ab-loser{border-color:var(--red)!important;background:rgba(255,49,49,0.05);}
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px;}
+.cal-day{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:6px;font-size:10px;min-height:60px;}
+.cal-day.has-post{border-color:var(--red);background:var(--red-dim);}
+.cal-day.has-short{border-color:var(--blue);background:rgba(61,158,255,0.08);}
+.cal-day-label{font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px;}
+.cal-post{font-size:9px;padding:2px 4px;border-radius:2px;margin-top:2px;line-height:1.3;}
+.cal-post.main{background:var(--red-dim);color:var(--red);}
+.cal-post.short{background:rgba(61,158,255,0.15);color:var(--blue);}
+@media(max-width:768px){.app{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.g2,.g3,.g4{grid-template-columns:1fr;}}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--red);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">▶</div>
+    <h1>CREATOR<span>OS</span></h1>
+    <p>AI INTELLIGENCE HUB</p>
+  </div>
+  <nav>
+    <div class="nav-section">Core</div>
+    <div class="nav-item" onclick="go('profil',this)">👤 &nbsp;Mein Creator-Profil <span class="est-badge">NEU</span></div>
+    <div class="nav-item active" onclick="go('setup',this)">⚙️ &nbsp;Setup & Keys</div>
+    <div class="nav-item" onclick="go('kanal',this)">📊 &nbsp;Kanal-Analyse <span class="data-badge">LIVE</span></div>
+    <div class="nav-item" onclick="go('video',this)">🎬 &nbsp;Video analysieren</div>
+    <div class="nav-section">Intelligence</div>
+    <div class="nav-item" onclick="go('trends',this)">🔥 &nbsp;Live Trends <span class="data-badge">LIVE</span></div>
+    <div class="nav-item" onclick="go('algo',this)">🧠 &nbsp;Algo-Monitor <span class="data-badge">LIVE</span></div>
+    <div class="nav-item" onclick="go('nischen',this)">🌍 &nbsp;Nischen-Checker <span class="est-badge">KI+DATA</span></div>
+    <div class="nav-item" onclick="go('nations',this)">🗺️ &nbsp;Nations-Analyse</div>
+    <div class="nav-section">Creator Tools</div>
+    <div class="nav-item" onclick="go('revenue',this)">💰 &nbsp;Revenue Calculator <span class="est-badge">NEU</span></div>
+    <div class="nav-item" onclick="go('abtest',this)">🖼️ &nbsp;A/B Thumbnail Test <span class="est-badge">NEU</span></div>
+    <div class="nav-item" onclick="go('kalender',this)">📅 &nbsp;Content-Kalender <span class="est-badge">NEU</span></div>
+    <div class="nav-item" onclick="go('viral',this)">⚡ &nbsp;Viral-Formel <span class="est-badge">NEU</span></div>
+    <div class="nav-item" onclick="go('masterprompt',this)">✍️ &nbsp;Masterprompt</div>
+    <div class="nav-item" onclick="go('recht',this)">⚖️ &nbsp;Rechts-Checker</div>
+    <div class="nav-section">System</div>
+    <div class="nav-item" onclick="go('costs',this)">💸 &nbsp;Kosten-Rechner <span class="est-badge">NEU</span></div>
+    <div class="nav-item" onclick="go('dna',this)">🧬 &nbsp;Creator DNA <span class="est-badge">NEU</span></div>
+    <div class="nav-item" onclick="go('slop',this)">🛡️ &nbsp;AI-Slop Checker <span class="est-badge">NEU</span></div>
+    <div class="nav-item" onclick="go('alerts',this)">🔔 &nbsp;Benachrichtigungen</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="algo-status"><div class="pulse"></div><span id="status-text">BEREIT</span></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px" id="api-status">APIs: Nicht verbunden</div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:10px 0">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">GUTHABEN</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:10px;color:var(--muted)">Claude API</span>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:700" id="budget-claude-live">$5.00</span>
+    </div>
+    <div style="height:3px;background:var(--border);border-radius:2px;margin-bottom:6px;overflow:hidden">
+      <div id="budget-claude-bar" style="height:100%;background:var(--green);border-radius:2px;transition:width 0.5s;width:100%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:10px;color:var(--muted)">Flow/Kling</span>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:700" id="budget-flow-live">100 Credits</span>
+    </div>
+    <div style="height:3px;background:var(--border);border-radius:2px;margin-bottom:8px;overflow:hidden">
+      <div id="budget-flow-bar" style="height:100%;background:var(--blue);border-radius:2px;transition:width 0.5s;width:100%"></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:4px">LETZTER VERBRAUCH</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--yellow)" id="last-cost">— noch keine Aktion</div>
+    <button onclick="document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-costs').classList.add('active');" style="margin-top:8px;width:100%;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:10px;padding:5px;border-radius:3px;cursor:pointer;font-family:var(--mono)">→ Kosten-Rechner öffnen</button>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ═══ CREATOR PROFIL ═══ -->
+<div class="panel" id="panel-profil">
+  <div class="page-hdr"><div><h2>MEIN CREATOR-PROFIL</h2><p>Einmal ausfüllen — alle Tabs werden automatisch personalisiert</p></div>
+  <button class="btn btn-red" onclick="saveProfil()">💾 Profil speichern</button></div>
+
+  <div class="alert alert-blue" style="margin-bottom:16px">
+    <span>💡</span><span>Je mehr du hier einträgst, desto präziser werden alle Analysen, Empfehlungen und Kalender für dich persönlich. Das Profil wird lokal gespeichert.</span>
+  </div>
+
+  <!-- PERSÖNLICH -->
+  <div class="setup-card">
+    <h3>👤 Persönliche Infos</h3>
+    <div class="g2" style="margin-bottom:10px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">DEIN NAME / CREATOR-NAME</label>
+        <input class="input-field" id="p-name" placeholder="z.B. Petros / The Silent Grind">
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">WOHNORT / HAUPTMARKT</label>
+        <select class="input-field" id="p-country" style="cursor:pointer">
+          <option value="de">🇩🇪 Deutschland</option>
+          <option value="at">🇦🇹 Österreich</option>
+          <option value="ch">🇨🇭 Schweiz</option>
+          <option value="et">🇪🇹 Äthiopien</option>
+          <option value="us">🇺🇸 USA</option>
+          <option value="other">Anderes Land</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">HINTERGRUND / EXPERTISE</label>
+        <input class="input-field" id="p-expertise" placeholder="z.B. Ingenieur, Betriebswirt, Karten-Experte, AI...">
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">PRODUKTIONS-STIL</label>
+        <select class="input-field" id="p-style" style="cursor:pointer">
+          <option value="faceless_voice">Faceless + AI Voiceover (ElevenLabs)</option>
+          <option value="faceless_own">Faceless + Eigene Stimme</option>
+          <option value="avatar">AI Avatar</option>
+          <option value="face">Mit Gesicht</option>
+          <option value="screen">Screen Recording</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- KANÄLE -->
+  <div class="setup-card">
+    <h3>📺 Deine YouTube Kanäle</h3>
+    <p>Füge alle aktiven und geplanten Kanäle ein — das Dashboard optimiert für jeden separat.</p>
+    <div id="kanal-list">
+      <!-- Kanal 1 -->
+      <div class="kanal-entry" id="ke-0" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:1px">KANAL 1 — AKTIV</span>
+          <span class="badge b-green">AKTIV</span>
+        </div>
+        <div class="g2" style="gap:8px;margin-bottom:8px">
+          <input class="input-field" id="k0-name" placeholder="Kanal-Name" value="The Silent Grind">
+          <input class="input-field" id="k0-niche" placeholder="Nische" value="Motivation, Disziplin, Self-Improvement">
+        </div>
+        <div class="g2" style="gap:8px;margin-bottom:8px">
+          <select class="input-field" id="k0-lang" style="cursor:pointer">
+            <option value="en" selected>🌐 Englisch</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="both">🌐+🇩🇪 Beide</option>
+            <option value="am">🇪🇹 Amharisch</option>
+            <option value="es">🇪🇸 Spanisch</option>
+          </select>
+          <select class="input-field" id="k0-freq" style="cursor:pointer">
+            <option value="1">1x pro Woche</option>
+            <option value="2">2x pro Woche</option>
+            <option value="3">3x pro Woche</option>
+          </select>
+        </div>
+        <input class="input-field" id="k0-url" placeholder="YouTube URL (optional)" style="font-size:11px">
+      </div>
+      <!-- Kanal 2 -->
+      <div class="kanal-entry" id="ke-1" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--yellow);letter-spacing:1px">KANAL 2 — GEPLANT</span>
+          <span class="badge b-yellow">GEPLANT</span>
+        </div>
+        <div class="g2" style="gap:8px;margin-bottom:8px">
+          <input class="input-field" id="k1-name" placeholder="z.B. KI Akte / GeoChronik" value="KI Akte">
+          <input class="input-field" id="k1-niche" placeholder="Nische" value="AI Dokumentationen Deutsch">
+        </div>
+        <div class="g2" style="gap:8px;margin-bottom:8px">
+          <select class="input-field" id="k1-lang" style="cursor:pointer">
+            <option value="de" selected>🇩🇪 Deutsch</option>
+            <option value="en">🌐 Englisch</option>
+            <option value="both">🌐+🇩🇪 Beide</option>
+            <option value="am">🇪🇹 Amharisch</option>
+          </select>
+          <select class="input-field" id="k1-freq" style="cursor:pointer">
+            <option value="1" selected>1x pro Woche</option>
+            <option value="2">2x pro Woche</option>
+          </select>
+        </div>
+        <input class="input-field" id="k1-url" placeholder="YouTube URL (noch nicht aktiv)" style="font-size:11px">
+      </div>
+      <!-- Kanal 3 -->
+      <div class="kanal-entry" id="ke-2" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px">KANAL 3 — GEPLANT</span>
+          <span class="badge b-blue">IDEE</span>
+        </div>
+        <div class="g2" style="gap:8px;margin-bottom:8px">
+          <input class="input-field" id="k2-name" placeholder="Kanal-Name" value="Afrika Tech / ET Diaspora">
+          <input class="input-field" id="k2-niche" placeholder="Nische" value="Tech & AI für afrikanische Diaspora">
+        </div>
+        <div class="g2" style="gap:8px;margin-bottom:8px">
+          <select class="input-field" id="k2-lang" style="cursor:pointer">
+            <option value="en" selected>🌐 Englisch</option>
+            <option value="am">🇪🇹 Amharisch</option>
+            <option value="both">Beide</option>
+          </select>
+          <select class="input-field" id="k2-freq" style="cursor:pointer">
+            <option value="1" selected>1x pro Woche</option>
+            <option value="2">2x pro Woche</option>
+          </select>
+        </div>
+        <input class="input-field" id="k2-url" placeholder="YouTube URL" style="font-size:11px">
+      </div>
+    </div>
+    <button class="btn btn-outline" onclick="addKanal()" style="font-size:12px;margin-top:4px">+ Weiteren Kanal hinzufügen</button>
+  </div>
+
+  <!-- TOOLS & PIPELINE -->
+  <div class="setup-card">
+    <h3>⚙️ Deine Produktions-Pipeline</h3>
+    <p>Welche Tools nutzt du? Das wird für den AI-Slop Checker und Masterprompt genutzt.</p>
+    <div class="g2" style="gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">SCRIPT</label>
+        <select class="input-field" id="p-script" style="cursor:pointer">
+          <option value="claude">Claude (Anthropic)</option>
+          <option value="chatgpt">ChatGPT</option>
+          <option value="own">Eigenes Script</option>
+          <option value="claude_own">Claude + eigene Überarbeitung</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">VOICEOVER</label>
+        <select class="input-field" id="p-voice" style="cursor:pointer">
+          <option value="elevenlabs">ElevenLabs</option>
+          <option value="own">Eigene Stimme</option>
+          <option value="elevenlabs_clone">ElevenLabs Voice Clone</option>
+          <option value="other">Anderes Tool</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2" style="gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">VIDEO / BILDER</label>
+        <select class="input-field" id="p-video" style="cursor:pointer">
+          <option value="kling">Kling AI</option>
+          <option value="flow">Google Flow</option>
+          <option value="runway">Runway</option>
+          <option value="stock">Stock Footage</option>
+          <option value="screen">Screen Recording</option>
+          <option value="mixed">Gemischt</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">EDITING</label>
+        <select class="input-field" id="p-edit" style="cursor:pointer">
+          <option value="capcut">CapCut</option>
+          <option value="premiere">Adobe Premiere</option>
+          <option value="davinci">DaVinci Resolve</option>
+          <option value="other">Anderes</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">THUMBNAIL</label>
+      <select class="input-field" id="p-thumb" style="cursor:pointer">
+        <option value="canva">Canva</option>
+        <option value="dalle">DALL-E 3</option>
+        <option value="flux">Flux AI</option>
+        <option value="midjourney">Midjourney</option>
+        <option value="mixed">Canva + AI</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ZIELE -->
+  <div class="setup-card" style="margin-bottom:0">
+    <h3>🎯 Deine Ziele</h3>
+    <div class="g2" style="gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">ZEITHORIZONT MONETARISIERUNG</label>
+        <select class="input-field" id="p-goal-time" style="cursor:pointer">
+          <option value="6">In 6 Monaten</option>
+          <option value="12" selected>In 12 Monaten</option>
+          <option value="24">In 24 Monaten</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">MONATLICHES EINNAHMEN-ZIEL</label>
+        <select class="input-field" id="p-goal-rev" style="cursor:pointer">
+          <option value="500">€500/Monat</option>
+          <option value="1000">€1.000/Monat</option>
+          <option value="3000" selected>€3.000/Monat</option>
+          <option value="5000">€5.000/Monat</option>
+          <option value="10000">€10.000+/Monat</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">WICHTIGSTE MÄRKTE (Mehrfach)</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="p-markets">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="de" checked> 🇩🇪 Deutschland</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="en" checked> 🌐 Englisch Global</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="et" checked> 🇪🇹 Äthiopien</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="br"> 🇧🇷 Brasilien</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="sa"> 🇸🇦 Arabisch</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="jp"> 🇯🇵 Japan</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFIL PREVIEW -->
+  <div id="profil-preview" style="display:none;margin-top:14px">
+    <div class="info-card">
+      <h3>✅ Profil gespeichert — alle Tabs personalisiert</h3>
+      <div id="profil-summary" class="ai-box" style="margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETUP ═══ -->
+<div class="panel active" id="panel-setup">
+  <div class="page-hdr"><div><h2>SETUP & API KEYS</h2><p>Verbinde deine APIs — alle Keys bleiben lokal in deinem Browser</p></div></div>
+  <div class="alert alert-blue" style="margin-bottom:16px"><span>🔒</span><span>Keys werden nur in deinem Browser gespeichert (localStorage). Kein Server, kein Tracking.</span></div>
+  <div class="g2">
+    <div>
+      <div class="setup-card">
+        <h3>🔑 Claude (Anthropic) API Key</h3>
+        <p>Für alle KI-Analysen. Holen: console.anthropic.com → API Keys</p>
+        <div class="input-row"><input class="input-field" id="k-claude" type="password" placeholder="sk-ant-api03-..."><button class="btn btn-red" onclick="saveKey('claude','k-claude','s-claude')">Speichern</button></div>
+        <span id="s-claude" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+      </div>
+      <div class="setup-card">
+        <h3>📺 YouTube Data API v3 Key</h3>
+        <p>Für echte Kanal-Daten. Kostenlos: console.cloud.google.com → YouTube Data API v3 aktivieren</p>
+        <div class="input-row"><input class="input-field" id="k-yt" type="password" placeholder="AIzaSy..."><button class="btn btn-red" onclick="saveKey('yt','k-yt','s-yt')">Speichern</button></div>
+        <span id="s-yt" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+      </div>
+    </div>
+    <div>
+      <div class="setup-card">
+        <h3>📡 YouTube Kanal-ID</h3>
+        <p>YouTube Studio → Einstellungen → Kanal → Erweiterte Einstellungen (beginnt mit UC...)</p>
+        <div class="input-row"><input class="input-field" id="k-ch" type="text" placeholder="UCxxxxxxxxxxxxxxxxxxxxxxxx"><button class="btn btn-red" onclick="saveKey('ch','k-ch','s-ch')">Speichern</button></div>
+        <span id="s-ch" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+      </div>
+      <div class="setup-card">
+        <h3>🎯 Deine Nische</h3>
+        <p>Für personalisierte Trends, Namen und Empfehlungen</p>
+        <div class="input-row"><input class="input-field" id="k-niche" type="text" placeholder="z.B. AI Dokumentationen, Geodaten, Tech DE..."><button class="btn btn-red" onclick="saveKey('niche','k-niche','s-niche')">Speichern</button></div>
+        <span id="s-niche" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+      </div>
+    </div>
+  </div>
+  <button class="btn btn-yellow" onclick="testAll()">⚡ Alle Verbindungen testen</button>
+  <div id="test-result" class="ai-box" style="display:none;margin-top:12px"></div>
+  <hr class="div">
+  <div class="info-card">
+    <h3>💰 API-Kosten Übersicht (Stand 2026)</h3>
+    <table class="data-table" style="margin-top:8px">
+      <thead><tr><th>API</th><th>Kosten</th><th>Was du bekommst</th><th>Datenqualität</th></tr></thead>
+      <tbody>
+        <tr><td>YouTube Data API v3</td><td><span class="badge b-green">0€</span></td><td>10.000 Units/Tag — Kanal, Videos, Stats</td><td><span class="badge b-green">LIVE DATEN</span></td></tr>
+        <tr><td>Claude (Anthropic)</td><td><span class="badge b-yellow">~$5–10/Mo</span></td><td>Alle KI-Analysen, Scripts, Prompts</td><td><span class="badge b-yellow">KI-ANALYSE</span></td></tr>
+        <tr><td>Google Trends</td><td><span class="badge b-green">0€</span></td><td>Wir nutzen Claude + Websuche statt API</td><td><span class="badge b-yellow">KI+SUCHE</span></td></tr>
+        <tr><td>Suno/Udio Musik</td><td><span class="badge b-green">0€ bis Monetarisierung</span></td><td>Lizenzfreie Musik generieren</td><td><span class="badge b-green">GENERIERT</span></td></tr>
+        <tr><td><strong>GESAMT</strong></td><td><span class="badge b-green"><strong>~$5–10/Mo</strong></span></td><td>Vollständige Creator AI Pipeline</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ KANAL ═══ -->
+<div class="panel" id="panel-kanal">
+  <div class="page-hdr"><div><h2>KANAL-ANALYSE</h2><p>Echte Live-Daten von YouTube + KI-Interpretation</p></div><button class="btn btn-red" onclick="loadChannel()">🔄 Laden</button></div>
+  <div class="ds-indicator ds-live">🟢 LIVE DATEN — YouTube Data API v3</div>
+  <div class="g4" style="margin-bottom:14px">
+    <div class="stat red"><div class="stat-label">Subscriber</div><div class="stat-val" id="ch-subs">—</div><div class="stat-sub" id="ch-subs-sub">Nicht geladen</div></div>
+    <div class="stat green"><div class="stat-label">Gesamt Views</div><div class="stat-val" id="ch-views">—</div><div class="stat-sub">Kumulativ</div></div>
+    <div class="stat blue"><div class="stat-label">Videos</div><div class="stat-val" id="ch-vids">—</div><div class="stat-sub">Hochgeladen</div></div>
+    <div class="stat yellow"><div class="stat-label">Kanal-Score</div><div class="stat-val" id="ch-score">—</div><div class="stat-sub">Algo-Gesundheit /10</div></div>
+  </div>
+  <div class="g2">
+    <div class="info-card"><h3>📋 Neueste Videos</h3><div id="ch-recent"><p style="font-size:12px;color:var(--muted)">Kanal-ID + YouTube API Key eingeben und laden...</p></div></div>
+    <div class="info-card"><h3>🧠 KI-Bewertung</h3><div id="ch-ai" class="ai-box" style="margin-top:0">Lade Kanal-Daten um KI-Analyse zu starten...</div></div>
+  </div>
+</div>
+
+<!-- ═══ VIDEO ANALYSIEREN ═══ -->
+<div class="panel" id="panel-video">
+  <div class="page-hdr"><div><h2>VIDEO ANALYSIEREN</h2><p>URL · Thumbnail-Upload · Manuelle Beschreibung</p></div></div>
+  <div style="display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);padding:4px;border-radius:4px;margin-bottom:14px;width:fit-content">
+    <button class="btn btn-red" id="vmode-url" onclick="setVMode('url')" style="font-size:11px;padding:6px 14px">🔗 URL</button>
+    <button class="btn btn-outline" id="vmode-upload" onclick="setVMode('upload')" style="font-size:11px;padding:6px 14px;border:none">📸 Upload</button>
+    <button class="btn btn-outline" id="vmode-manual" onclick="setVMode('manual')" style="font-size:11px;padding:6px 14px;border:none">✍️ Manuell</button>
+  </div>
+  <div id="vm-url">
+    <div class="setup-card"><h3>🔗 YouTube URL</h3><p>Holt Metadaten via API (Titel, Tags, Views, Likes) → KI-Analyse</p><div class="input-row"><input class="input-field" id="v-url" placeholder="https://youtube.com/watch?v=..."><button class="btn btn-red" onclick="analyzeURL()">Analysieren</button></div></div>
+  </div>
+  <div id="vm-upload" style="display:none">
+    <div class="setup-card">
+      <h3>📸 Thumbnail / Screenshot hochladen</h3>
+      <p>Claude sieht das Bild direkt — analysiert Klickrate, Farben, Text, Stil, Verbesserungen.</p>
+      <div class="drop-zone" id="drop-z" onclick="document.getElementById('file-in').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+        <div style="font-size:28px">📁</div>
+        <div style="font-size:13px;font-weight:700">Klicken oder Datei hierher ziehen</div>
+        <div style="font-size:11px;color:var(--muted)">PNG · JPG · max 10MB</div>
+        <input type="file" id="file-in" style="display:none" accept="image/*" onchange="handleFile(event)">
+      </div>
+      <div id="upload-prev" style="display:none;margin-top:12px">
+        <img id="prev-img" style="max-width:240px;border-radius:4px;border:1px solid var(--border)">
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <span id="file-nm" style="font-size:12px;color:var(--muted)"></span>
+          <button class="btn btn-outline" style="font-size:11px;padding:4px 10px" onclick="clearFile()">✕</button>
+        </div>
+      </div>
+      <div style="margin-top:12px"><input class="input-field" id="upload-ctx" placeholder="Kontext: Thema, Zielgruppe, Nische..."></div>
+      <button class="btn btn-red" id="upload-btn" onclick="analyzeUpload()" disabled style="margin-top:10px">📸 Analysieren</button>
+    </div>
+  </div>
+  <div id="vm-manual" style="display:none">
+    <div class="setup-card">
+      <h3>✍️ Manuell beschreiben</h3>
+      <div style="display:grid;gap:10px">
+        <input class="input-field" id="m-title" placeholder="Video-Titel">
+        <input class="input-field" id="m-thumb" placeholder="Thumbnail: Was sieht man? Farben, Text, Gesicht?">
+        <textarea class="input-field" id="m-hook" rows="2" style="resize:vertical" placeholder="Erste 30 Sekunden / Hook..."></textarea>
+        <input class="input-field" id="m-desc" placeholder="Länge, Thema, Zielgruppe...">
+      </div>
+      <button class="btn btn-red" onclick="analyzeManual()" style="margin-top:10px">🧠 Analysieren</button>
+    </div>
+  </div>
+  <div id="v-result" style="display:none;margin-top:14px">
+    <div id="v-visual" style="display:none;margin-bottom:14px"><div class="info-card"><h3>👁️ Was ich sehe</h3><div id="v-visual-text" class="ai-box" style="margin-top:8px"></div></div></div>
+    <div class="g4" style="margin-bottom:12px">
+      <div class="stat red"><div class="stat-label">Hook</div><div class="stat-val" id="sc-hook">—</div><div class="stat-sub">/10</div></div>
+      <div class="stat green"><div class="stat-label">SEO</div><div class="stat-val" id="sc-seo">—</div><div class="stat-sub">/10</div></div>
+      <div class="stat blue"><div class="stat-label">Thumbnail</div><div class="stat-val" id="sc-thumb">—</div><div class="stat-sub">/10</div></div>
+      <div class="stat yellow"><div class="stat-label">Gesamt</div><div class="stat-val" id="sc-total">—</div><div class="stat-sub">/10</div></div>
+    </div>
+    <div class="info-card" style="margin-bottom:12px"><h3>📊 Scores</h3><div id="sc-bars"></div></div>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="info-card"><h3>✅ Stärken</h3><div id="v-strengths"></div></div>
+      <div class="info-card"><h3>⚠️ Schwächen</h3><div id="v-weaknesses"></div></div>
+    </div>
+    <div class="info-card"><h3>🎯 Nächste Schritte</h3><div id="v-actions" class="ai-box" style="margin-top:8px"></div></div>
+  </div>
+</div>
+
+<!-- ═══ TRENDS ═══ -->
+<div class="panel" id="panel-trends">
+  <div class="page-hdr"><div><h2>LIVE TRENDS</h2><p>Aktuelle Bewegungen in deiner Nische — KI recherchiert live</p></div><button class="btn btn-red" onclick="loadTrends()">🔄 Laden</button></div>
+  <div class="ds-indicator ds-mixed">🔵 KI + Live-Recherche — Websuche + Claude Analyse</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="info-card"><h3>🔥 Trending jetzt</h3><div id="trend-list"><p style="font-size:12px;color:var(--muted)">Klicke "Laden"...</p></div></div>
+    <div class="info-card"><h3>📈 Empfehlungen für dich</h3><div id="trend-recs" class="ai-box" style="margin-top:0">Noch keine...</div></div>
+  </div>
+  <div class="info-card"><h3>💡 Video-Ideen Generator</h3>
+    <div class="input-row" style="margin-top:10px"><input class="input-field" id="idea-ctx" placeholder="Optionaler Kontext..."><button class="btn btn-yellow" onclick="genIdeas()">Ideen generieren</button></div>
+    <div id="idea-result" class="ai-box" style="display:none;margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- ═══ ALGO MONITOR ═══ -->
+<div class="panel" id="panel-algo">
+  <div class="page-hdr"><div><h2>ALGO-MONITOR</h2><p>Aktuelle Änderungen am YouTube-Algorithmus</p></div><button class="btn btn-red" onclick="checkAlgo()">🔍 Prüfen</button></div>
+  <div class="ds-indicator ds-mixed">🔵 KI + Live-Recherche — Creator-Berichte + YouTube Blog</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="info-card"><h3>🔬 Letzte Änderungen</h3><div id="algo-changes"><p style="font-size:12px;color:var(--muted)">Klicke "Prüfen"...</p></div></div>
+    <div class="info-card"><h3>🎯 Impact für dich</h3><div id="algo-impact" class="ai-box" style="margin-top:0">Noch keine Analyse...</div></div>
+  </div>
+  <div class="info-card"><h3>📚 Algo-Grundfaktoren (immer aktuell)</h3>
+    <div class="g3" style="margin-top:10px">
+      <div><div class="badge b-red" style="margin-bottom:6px">FAKTOR #1</div><h4 style="font-size:12px;margin-bottom:4px">Click-Through Rate</h4><p style="font-size:11px;color:var(--muted);line-height:1.5">Ziel: 6–10%. Thumbnail + Titel entscheiden. Der Algo zeigt dein Video mehr wenn Menschen klicken.</p></div>
+      <div><div class="badge b-yellow" style="margin-bottom:6px">FAKTOR #2</div><h4 style="font-size:12px;margin-bottom:4px">Watch Time / AVD</h4><p style="font-size:11px;color:var(--muted);line-height:1.5">Ziel: 50%+ Retention. Hook in 3 Sek. Pattern Interrupt alle 90 Sek. Kein langer Intro.</p></div>
+      <div><div class="badge b-green" style="margin-bottom:6px">FAKTOR #3</div><h4 style="font-size:12px;margin-bottom:4px">Satisfaction Signals</h4><p style="font-size:11px;color:var(--muted);line-height:1.5">Likes, Shares, Kommentare, "Nicht interessiert"-Rate. Qualität schlägt Quantität.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NISCHEN-CHECKER ═══ -->
+<div class="panel" id="panel-nischen">
+  <div class="page-hdr"><div><h2>NISCHEN-CHECKER</h2><p>Sättigung · CPM · Konkurrenz · Kanal-Namen — weltweit</p></div></div>
+  <div class="ds-indicator ds-ai">🟡 KI-Schätzung basierend auf Marktdaten — keine Echtzeit-API</div>
+  <div class="setup-card">
+    <h3>🌍 Nische + Markt analysieren</h3>
+    <div class="g2" style="margin-bottom:10px">
+      <input class="input-field" id="nc-niche" placeholder="z.B. AI Dokumentationen, Coding, Finanzbildung...">
+      <select class="input-field" id="nc-market" style="cursor:pointer">
+        <option value="de">🇩🇪 Deutsch (DE/AT/CH)</option>
+        <option value="en">🌐 Englisch (Global)</option>
+        <option value="es">🇪🇸 Spanisch (LATAM)</option>
+        <option value="pt">🇧🇷 Portugiesisch (BR)</option>
+        <option value="fr">🇫🇷 Französisch</option>
+        <option value="ar">🇸🇦 Arabisch (MENA)</option>
+        <option value="hi">🇮🇳 Hindi</option>
+        <option value="tr">🇹🇷 Türkisch</option>
+      </select>
+    </div>
+    <button class="btn btn-red" onclick="runNischen()">🔍 Analysieren</button>
+  </div>
+  <div id="nc-result"></div>
+</div>
+
+<!-- ═══ NATIONS-ANALYSE ═══ -->
+<div class="panel" id="panel-nations">
+  <div class="page-hdr"><div><h2>NATIONS-ANALYSE</h2><p>Was in welchem Land funktioniert — Stil, CPM, AI-Bildprompts</p></div></div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="setup-card" style="margin-bottom:0">
+      <h3>🌐 Land wählen</h3>
+      <select class="input-field" id="nat-sel" style="cursor:pointer;margin-bottom:10px">
+        <option value="de">🇩🇪 Deutschland</option><option value="et">🇪🇹 Äthiopien</option>
+        <option value="jp">🇯🇵 Japan</option><option value="us">🇺🇸 USA</option>
+        <option value="br">🇧🇷 Brasilien</option><option value="in">🇮🇳 Indien</option>
+        <option value="sa">🇸🇦 Saudi-Arabien</option><option value="ng">🇳🇬 Nigeria</option>
+        <option value="fr">🇫🇷 Frankreich</option><option value="tr">🇹🇷 Türkei</option>
+        <option value="mx">🇲🇽 Mexiko</option><option value="cn">🇨🇳 China</option>
+      </select>
+      <button class="btn btn-red" onclick="showNation()">Analysieren</button>
+    </div>
+    <div class="info-card" style="margin-bottom:0">
+      <h3>📊 Markt-Schnellübersicht</h3>
+      <table class="data-table">
+        <thead><tr><th>Land</th><th>CPM</th><th>Chance</th></tr></thead>
+        <tbody>
+          <tr><td>🇩🇪 Deutschland</td><td><span class="badge b-green">€25–55</span></td><td><span class="badge b-green">HOCH</span></td></tr>
+          <tr><td>🇪🇹 Äthiopien</td><td><span class="badge b-yellow">€0.5–2</span></td><td><span class="badge b-blue">BLAUER OZEAN</span></td></tr>
+          <tr><td>🇯🇵 Japan</td><td><span class="badge b-green">€15–35</span></td><td><span class="badge b-yellow">MITTEL</span></td></tr>
+          <tr><td>🇺🇸 USA</td><td><span class="badge b-green">€18–50</span></td><td><span class="badge b-red">HART</span></td></tr>
+          <tr><td>🇧🇷 Brasilien</td><td><span class="badge b-yellow">€4–12</span></td><td><span class="badge b-green">HOCH</span></td></tr>
+          <tr><td>🇸🇦 Saudi-Arabien</td><td><span class="badge b-green">€8–20</span></td><td><span class="badge b-green">OFFEN</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div id="nat-detail"></div>
+</div>
+
+<!-- ═══ REVENUE CALCULATOR ═══ -->
+<div class="panel" id="panel-revenue">
+  <div class="page-hdr"><div><h2>REVENUE CALCULATOR</h2><p>Was du verdienen kannst — realistisch aufgeschlüsselt</p></div></div>
+  <div class="ds-indicator ds-ai">🟡 Schätzung — basiert auf Durchschnittswerten nach Nische und Markt</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="setup-card" style="margin-bottom:0">
+      <h3>📊 Deine Parameter eingeben</h3>
+      <div style="display:grid;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">NISCHE</label>
+          <select class="input-field" id="rev-niche" style="cursor:pointer">
+            <option value="ai_doku">AI Dokumentationen</option>
+            <option value="finance">Finanzbildung</option>
+            <option value="coding">Coding/Tech</option>
+            <option value="motivation">Motivation/Lifestyle</option>
+            <option value="gaming">Gaming</option>
+            <option value="health">Gesundheit/Fitness</option>
+            <option value="travel">Reise</option>
+            <option value="food">Kochen/Food</option>
+            <option value="education">Bildung/Tutorial</option>
+            <option value="entertainment">Entertainment</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">ZIELMARKT</label>
+          <select class="input-field" id="rev-market" style="cursor:pointer">
+            <option value="de">🇩🇪 Deutschland (€25–55 CPM)</option>
+            <option value="en">🌐 Englisch Global (€18–50 CPM)</option>
+            <option value="et">🇪🇹 Äthiopien (€0.5–2 CPM)</option>
+            <option value="br">🇧🇷 Brasilien (€4–12 CPM)</option>
+            <option value="in">🇮🇳 Indien (€1–5 CPM)</option>
+            <option value="sa">🇸🇦 Saudi-Arabien (€8–20 CPM)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">MONATLICHE VIEWS (GESCHÄTZT)</label>
+          <select class="input-field" id="rev-views" style="cursor:pointer">
+            <option value="1000">1.000 Views/Monat (Starter)</option>
+            <option value="5000">5.000 Views/Monat</option>
+            <option value="10000">10.000 Views/Monat</option>
+            <option value="25000">25.000 Views/Monat</option>
+            <option value="50000">50.000 Views/Monat</option>
+            <option value="100000">100.000 Views/Monat</option>
+            <option value="500000">500.000 Views/Monat</option>
+            <option value="1000000">1 Million Views/Monat</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">VIDEO-LÄNGE</label>
+          <select class="input-field" id="rev-len" style="cursor:pointer">
+            <option value="short">Shorts (< 60 Sek.) — niedrigeres CPM</option>
+            <option value="mid" selected>Mittel (5–15 Min.) — Standard CPM</option>
+            <option value="long">Lang (15–60 Min.) — höheres CPM</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">SUBSCRIBER-ZAHL (für Sponsoring)</label>
+          <select class="input-field" id="rev-subs" style="cursor:pointer">
+            <option value="0">Noch 0 — nicht monetarisiert</option>
+            <option value="1000">1.000 (gerade monetarisiert)</option>
+            <option value="5000">5.000</option>
+            <option value="10000">10.000</option>
+            <option value="50000">50.000</option>
+            <option value="100000">100.000+</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-red" onclick="calcRevenue()">💰 Einnahmen berechnen</button>
+    </div>
+    <div id="rev-result">
+      <div class="info-card" style="margin-bottom:14px">
+        <h3>💡 Wie YouTube-Einnahmen funktionieren</h3>
+        <div class="alert alert-blue"><span>📺</span><span style="font-size:12px">CPM = Cost per Mille = was Werbetreibende pro 1000 Impressionen zahlen. Du bekommst ~45% davon (RPM).</span></div>
+        <div class="alert alert-yellow"><span>⚠️</span><span style="font-size:12px">Shorts haben 3–5x niedrigeren RPM als normale Videos. Länge zählt.</span></div>
+        <div class="alert alert-green"><span>✓</span><span style="font-size:12px">Sponsoring kann AdSense 3–10x übersteigen — ab 5.000 Subs realistisch.</span></div>
+        <div class="alert alert-green" style="margin-bottom:0"><span>✓</span><span style="font-size:12px">Eigenes digitales Produkt (Kurs/Template) = unbegrenztes Potential, unabhängig von Views.</span></div>
+      </div>
+    </div>
+  </div>
+  <div id="rev-ai" style="display:none;margin-top:2px">
+    <div class="info-card"><h3>🧠 KI-Strategie für maximale Einnahmen</h3><div id="rev-ai-text" class="ai-box" style="margin-top:8px"></div></div>
+  </div>
+</div>
+
+<!-- ═══ A/B THUMBNAIL TEST ═══ -->
+<div class="panel" id="panel-abtest">
+  <div class="page-hdr"><div><h2>A/B THUMBNAIL TEST</h2><p>Zwei Thumbnails vergleichen — welches bekommt mehr Klicks?</p></div></div>
+  <div class="ds-indicator ds-ai">🟡 KI-Analyse — Claude bewertet beide Thumbnails visuell</div>
+  <div class="alert alert-blue" style="margin-bottom:14px"><span>💡</span><span>Lade zwei verschiedene Thumbnails hoch. Claude analysiert beide und sagt dir klar welches gewinnt und warum.</span></div>
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:8px">THUMBNAIL A</div>
+      <div class="ab-slot" id="ab-a-slot" onclick="document.getElementById('ab-a-in').click()">
+        <div style="font-size:24px">🖼️</div>
+        <div style="font-size:12px;font-weight:700">Klicken zum Hochladen</div>
+        <div style="font-size:11px;color:var(--muted)">PNG / JPG</div>
+        <input type="file" id="ab-a-in" style="display:none" accept="image/*" onchange="loadAB('a',event)">
+      </div>
+      <div id="ab-a-score" style="margin-top:8px;display:none">
+        <div class="stat green" style="text-align:center"><div class="stat-label">CTR-Score A</div><div class="stat-val" id="ab-a-val">—</div></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:8px">THUMBNAIL B</div>
+      <div class="ab-slot" id="ab-b-slot" onclick="document.getElementById('ab-b-in').click()">
+        <div style="font-size:24px">🖼️</div>
+        <div style="font-size:12px;font-weight:700">Klicken zum Hochladen</div>
+        <div style="font-size:11px;color:var(--muted)">PNG / JPG</div>
+        <input type="file" id="ab-b-in" style="display:none" accept="image/*" onchange="loadAB('b',event)">
+      </div>
+      <div id="ab-b-score" style="margin-top:8px;display:none">
+        <div class="stat red" style="text-align:center"><div class="stat-label">CTR-Score B</div><div class="stat-val" id="ab-b-val">—</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom:12px">
+    <input class="input-field" id="ab-ctx" placeholder="Kontext: Thema, Nische, Zielgruppe...">
+  </div>
+  <button class="btn btn-red" id="ab-btn" onclick="runABTest()" disabled>🔍 A/B Test starten</button>
+  <div id="ab-result" style="display:none;margin-top:14px">
+    <div class="info-card" style="margin-bottom:12px"><h3 id="ab-winner-title">🏆 Gewinner</h3><div id="ab-winner-text" class="ai-box" style="margin-top:8px"></div></div>
+    <div class="g2">
+      <div class="info-card"><h3>📋 Analyse Thumbnail A</h3><div id="ab-a-analysis" style="font-size:12px;line-height:1.7;color:#aaa"></div></div>
+      <div class="info-card"><h3>📋 Analyse Thumbnail B</h3><div id="ab-b-analysis" style="font-size:12px;line-height:1.7;color:#aaa"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONTENT KALENDER ═══ -->
+<div class="panel" id="panel-kalender">
+  <div class="page-hdr"><div><h2>CONTENT-KALENDER</h2><p>30-Tage-Plan automatisch generiert — Titel, Zeiten, Shorts</p></div></div>
+  <div class="ds-indicator ds-ai">🟡 KI-generiert — basiert auf Algo-Empfehlungen für deine Nische</div>
+  <div class="setup-card">
+    <h3>⚙️ Kalender konfigurieren</h3>
+    <div class="g2" style="margin-bottom:10px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">UPLOAD-FREQUENZ</label>
+        <select class="input-field" id="kal-freq" style="cursor:pointer">
+          <option value="1">1x pro Woche (Empfohlen für Anfänger)</option>
+          <option value="2">2x pro Woche</option>
+          <option value="3">3x pro Woche</option>
+          <option value="7">Täglich</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">SHORTS DAZU?</label>
+        <select class="input-field" id="kal-shorts" style="cursor:pointer">
+          <option value="none">Keine Shorts</option>
+          <option value="3">3 Shorts/Woche</option>
+          <option value="5">5 Shorts/Woche (Täglich)</option>
+        </select>
+      </div>
+    </div>
+    <input class="input-field" id="kal-focus" placeholder="Fokus-Themen für diesen Monat (optional)..." style="margin-bottom:10px">
+    <button class="btn btn-red" onclick="genKalender()">📅 30-Tage-Plan generieren</button>
+  </div>
+  <div id="kal-result"></div>
+</div>
+
+<!-- ═══ VIRAL FORMEL ═══ -->
+<div class="panel" id="panel-viral">
+  <div class="page-hdr"><div><h2>VIRAL-FORMEL CHECKER</h2><p>Wie viral ist deine Video-Idee? — Score + Verbesserungen</p></div></div>
+  <div class="ds-indicator ds-ai">🟡 KI-Analyse — basiert auf Mustern viraler Videos in deiner Nische</div>
+  <div class="setup-card">
+    <h3>⚡ Video-Idee eingeben</h3>
+    <p>Beschreibe deine Video-Idee. Ich berechne das Viral-Potential basierend auf: Emotionalen Triggern, Timing, Nischen-Fit, Hook-Stärke, Teilbarkeit.</p>
+    <textarea class="input-field" id="viral-input" rows="3" style="resize:vertical;margin-bottom:10px;width:100%" placeholder="z.B. 'Ich zeige wie ich in 24h einen AI-Dokumentarfilm erstellt habe' oder 'Die Geschichte wie OpenAI fast bankrott ging'..."></textarea>
+    <div class="g2" style="margin-bottom:10px">
+      <select class="input-field" id="viral-niche" style="cursor:pointer">
+        <option value="">Nische wählen (optional)</option>
+        <option>AI Dokumentationen</option><option>Tech Tutorial</option>
+        <option>Finanzbildung</option><option>Motivation</option>
+        <option>Gaming</option><option>True Crime</option>
+        <option>Geo/Karten</option><option>Coding</option>
+      </select>
+      <select class="input-field" id="viral-market" style="cursor:pointer">
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="en">🌐 Englisch</option>
+        <option value="es">🇪🇸 Spanisch</option>
+      </select>
+    </div>
+    <button class="btn btn-red" onclick="checkViral()">⚡ Viral-Score berechnen</button>
+  </div>
+  <div id="viral-result" style="display:none;margin-top:14px">
+    <div class="g4" style="margin-bottom:12px">
+      <div class="stat red"><div class="stat-label">Viral-Score</div><div class="stat-val" id="vsc-total">—</div><div class="stat-sub">/10</div></div>
+      <div class="stat green"><div class="stat-label">Emotion</div><div class="stat-val" id="vsc-emo">—</div><div class="stat-sub">/10</div></div>
+      <div class="stat blue"><div class="stat-label">Timing</div><div class="stat-val" id="vsc-time">—</div><div class="stat-sub">/10</div></div>
+      <div class="stat yellow"><div class="stat-label">Hook-Kraft</div><div class="stat-val" id="vsc-hook">—</div><div class="stat-sub">/10</div></div>
+    </div>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="info-card"><h3>🚀 Viral-Verstärker</h3><div id="v-boosters"></div></div>
+      <div class="info-card"><h3>🔧 Was du optimieren solltest</h3><div id="v-fixes"></div></div>
+    </div>
+    <div class="info-card" style="margin-bottom:12px"><h3>🎬 Optimierter Titel-Vorschlag</h3><div id="v-title" class="ai-box" style="margin-top:8px"></div></div>
+    <div class="info-card"><h3>⚡ Verbesserter Hook (erste 15 Sek.)</h3><div id="v-hook" class="ai-box" style="margin-top:8px"></div></div>
+  </div>
+</div>
+
+<!-- ═══ MASTERPROMPT ═══ -->
+<div class="panel" id="panel-masterprompt">
+  <div class="page-hdr"><div><h2>MASTERPROMPT</h2><p>Ein Thema — 8 Sprachen — kulturell angepasst</p></div></div>
+  <div class="setup-card">
+    <h3>✍️ Prompt konfigurieren</h3>
+    <select class="input-field" id="mp-type" style="cursor:pointer;margin-bottom:10px">
+      <option value="script">🎬 Video Script (8–10 Min.)</option>
+      <option value="thumbnail">🖼 Thumbnail Prompt (DALL-E/Flux)</option>
+      <option value="seo">📝 SEO Paket (Titel + Tags + Description)</option>
+      <option value="hook">⚡ Hook-Varianten (5 Versionen)</option>
+      <option value="short">📱 Shorts Script (60 Sek.)</option>
+      <option value="image">🎨 AI Charakter / Avatar Prompt</option>
+    </select>
+    <textarea class="input-field" id="mp-input" rows="3" style="resize:vertical;width:100%;margin-bottom:10px" placeholder="Thema / Idee / Roher Prompt..."></textarea>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="de" checked> 🇩🇪 Deutsch</label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="en" checked> 🇺🇸 Englisch</label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="zh"> 🇨🇳 Chinesisch</label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="ja"> 🇯🇵 Japanisch</label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="es"> 🇪🇸 Spanisch</label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="am"> 🇪🇹 Amharisch</label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="pt"> 🇧🇷 Portugiesisch</label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" value="ar"> 🇸🇦 Arabisch</label>
+    </div>
+    <button class="btn btn-red" id="mp-btn" onclick="genMasterprompt()">⚡ Generieren</button>
+  </div>
+  <div id="mp-results"></div>
+</div>
+
+<!-- ═══ RECHTS-CHECKER ═══ -->
+<div class="panel" id="panel-recht">
+  <div class="page-hdr"><div><h2>RECHTS-CHECKER</h2><p>Copyright · Persönlichkeitsrecht · Plattformregeln · Musik</p></div></div>
+  <div class="alert alert-yellow" style="margin-bottom:14px"><span>⚠️</span><span>Fundierte Einschätzung basierend auf YouTube-Richtlinien 2026. Kein Ersatz für Rechtsberatung.</span></div>
+  <div class="setup-card">
+    <h3>🔍 Was möchtest du verwenden?</h3>
+    <textarea class="input-field" id="rc-input" rows="2" style="resize:vertical;width:100%;margin-bottom:10px" placeholder="z.B. 'Dr. Dre Beat als Hintergrundmusik' oder 'Screenshot von Instagram' oder '10 Sek. Netflix-Clip'..."></textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-red" onclick="runRecht()">⚖️ Prüfen</button>
+      <button class="btn btn-outline" onclick="document.getElementById('rc-input').value='Ich möchte einen Dr. Dre / Snoop Dogg Beat als Hintergrundmusik nutzen'">Beispiel: Musik</button>
+      <button class="btn btn-outline" onclick="document.getElementById('rc-input').value='Ich zeige ein Foto von Elon Musk im Thumbnail'">Beispiel: Person</button>
+    </div>
+  </div>
+  <div id="rc-result"></div>
+  <hr class="div">
+  <div class="info-card" style="margin-bottom:14px">
+    <h3>🎵 Lizenzfreie Musik generieren</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Stil beschreiben → fertiger Suno/Udio Prompt → 100% lizenzfrei</p>
+    <div class="g2" style="margin-bottom:10px">
+      <input class="input-field" id="mus-ref" placeholder="z.B. Dr. Dre G-Funk West Coast...">
+      <select class="input-field" id="mus-use" style="cursor:pointer">
+        <option>Hintergrundmusik (CapCut/Video)</option>
+        <option>Intro / Outro</option>
+        <option>YouTube Shorts</option>
+        <option>Dokumentations-Untermalung</option>
+      </select>
+    </div>
+    <button class="btn btn-yellow" onclick="genMusic()">🎶 Musik-Prompt generieren</button>
+    <div id="mus-result" style="display:none;margin-top:12px"></div>
+  </div>
+  <div class="info-card">
+    <h3>✅ Sichere Musik-Quellen</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:700">YouTube Audio Library</span><span class="badge b-green">0€</span></div><div style="font-size:11px;color:var(--muted)">In YouTube Studio eingebaut</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:700">Suno AI</span><span class="badge b-yellow">Free/Pro</span></div><div style="font-size:11px;color:var(--muted)">AI generiert — dir gehörend</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:700">Udio</span><span class="badge b-yellow">Free/Pro</span></div><div style="font-size:11px;color:var(--muted)">AI generiert, hohe Qualität</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:700">Epidemic Sound</span><span class="badge b-yellow">€15/Mo</span></div><div style="font-size:11px;color:var(--muted)">Beste Qualität</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:700">Pixabay Music</span><span class="badge b-green">0€</span></div><div style="font-size:11px;color:var(--muted)">CC0 — immer sicher</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:700">NCS</span><span class="badge b-green">0€</span></div><div style="font-size:11px;color:var(--muted)">Electronic, Link in Bio</div></div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ KOSTEN-RECHNER ═══ -->
+<div class="panel" id="panel-costs">
+  <div class="page-hdr"><div><h2>KOSTEN-RECHNER</h2><p>Vor der Produktion wissen was ein Video kostet — Credit für Credit</p></div></div>
+  <div class="ds-indicator ds-ai">🟡 Basiert auf offiziellen Preislisten — Stand Mai 2026</div>
+
+  <div class="setup-card">
+    <h3>💰 Dein Guthaben</h3>
+    <div class="g2" style="gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">CLAUDE API ($)</label>
+        <input class="input-field" id="b-claude" type="number" value="5.00" step="0.01">
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">ELEVENLABS PLAN</label>
+        <select class="input-field" id="b-el" style="cursor:pointer">
+          <option value="free">Free (10.000 Zeichen/Mo)</option>
+          <option value="starter" selected>Starter ($5 — 30.000 Zeichen/Mo)</option>
+          <option value="creator">Creator ($22 — 100.000 Zeichen/Mo)</option>
+          <option value="pro">Pro ($99 — 500.000 Zeichen/Mo)</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2" style="gap:8px;margin-bottom:8px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">GOOGLE FLOW / KLING CREDITS</label>
+        <input class="input-field" id="b-flow" type="number" value="100">
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">CAPCUT</label>
+        <select class="input-field" id="b-capcut" style="cursor:pointer">
+          <option value="free">Free</option>
+          <option value="pro" selected>Pro (~$10/Mo — unbegrenzt)</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-outline" style="font-size:12px" onclick="saveBudget()">💾 Speichern</button>
+    <span id="b-saved" style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:10px"></span>
+  </div>
+
+  <div class="setup-card">
+    <h3>📝 Script eingeben → Kosten berechnen</h3>
+    <p>Füge dein Script ein (oder beschreibe das Video). Ich zähle Zeichen, schätze Szenen, berechne alles vor dem ersten Click.</p>
+    <textarea class="input-field" id="cost-script" rows="5" style="resize:vertical;width:100%;margin-bottom:10px" placeholder="Script hier einfügen — oder beschreiben: '8 Min. Video über OpenAI Geschichte, ca. 1200 Wörter, 10 Szenen...'"></textarea>
+    <div class="g2" style="gap:8px;margin-bottom:10px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">VIDEO-LÄNGE</label>
+        <select class="input-field" id="cost-len" style="cursor:pointer">
+          <option value="1">Shorts (< 1 Min.)</option>
+          <option value="5">5 Minuten</option>
+          <option value="8" selected>8 Minuten</option>
+          <option value="12">12 Minuten</option>
+          <option value="20">20+ Minuten</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">ANZAHL SZENEN / CLIPS</label>
+        <select class="input-field" id="cost-scenes" style="cursor:pointer">
+          <option value="5">5 Szenen</option>
+          <option value="10" selected>10 Szenen</option>
+          <option value="15">15 Szenen</option>
+          <option value="20">20+ Szenen</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-red" onclick="calcCosts()">💸 Kosten berechnen</button>
+      <button class="btn btn-yellow" onclick="calcCosts(true)">📊 + KI-Optimierungs-Tipp</button>
+    </div>
+  </div>
+
+  <div id="cost-result" style="display:none;margin-top:14px">
+
+    <!-- HAUPT-KOSTEN -->
+    <div class="g4" style="margin-bottom:14px">
+      <div class="stat blue"><div class="stat-label">Claude Script</div><div class="stat-val" id="c-claude" style="font-size:22px">—</div><div class="stat-sub">USD</div></div>
+      <div class="stat green"><div class="stat-label">ElevenLabs Voice</div><div class="stat-val" id="c-el" style="font-size:22px">—</div><div class="stat-sub">Zeichen</div></div>
+      <div class="stat yellow"><div class="stat-label">Flow/Kling Clips</div><div class="stat-val" id="c-flow" style="font-size:22px">—</div><div class="stat-sub">Credits</div></div>
+      <div class="stat red"><div class="stat-label">GESAMT</div><div class="stat-val" id="c-total" style="font-size:22px">—</div><div class="stat-sub">pro Video</div></div>
+    </div>
+
+    <!-- DETAIL AUFSCHLÜSSELUNG -->
+    <div class="info-card" style="margin-bottom:14px">
+      <h3>📋 Vollständige Aufschlüsselung</h3>
+      <div id="cost-breakdown"></div>
+    </div>
+
+    <!-- REICHWEITE DEINES GUTHABENS -->
+    <div class="info-card" style="margin-bottom:14px">
+      <h3>🔋 Wie lange reicht dein Guthaben?</h3>
+      <div id="cost-reach"></div>
+    </div>
+
+    <!-- KI TIPP -->
+    <div id="cost-ai-tip" style="display:none">
+      <div class="info-card">
+        <h3>💡 Wie du Kosten reduzierst ohne Qualität zu verlieren</h3>
+        <div id="cost-ai-text" class="ai-box" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CREATOR DNA ═══ -->
+<div class="panel" id="panel-dna">
+  <div class="page-hdr"><div><h2>CREATOR DNA</h2><p>Dein lernender Masterprompt — wird mit jedem Video besser</p></div></div>
+  <div class="ds-indicator ds-ai">🟡 Lokal gespeichert — lernt aus deinem Feedback</div>
+
+  <div class="alert alert-green" style="margin-bottom:14px">
+    <span>🧬</span><span>Das ist dein persönlicher Prompt-Kern. Er gilt für alle Kanäle die du je erstellst. Wenn du Kanal 10 startest — er weiß bereits wie du schreibst, was du vermeidest, wie du denkst.</span>
+  </div>
+
+  <!-- TABS -->
+  <div style="display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);padding:4px;border-radius:4px;margin-bottom:14px;width:fit-content">
+    <button class="btn btn-red" id="dna-tab-base" onclick="setDNATab('base')" style="font-size:11px;padding:6px 14px">🧬 Meine DNA</button>
+    <button class="btn btn-outline" id="dna-tab-gen" onclick="setDNATab('gen')" style="font-size:11px;padding:6px 14px;border:none;color:var(--muted)">⚡ Script generieren</button>
+    <button class="btn btn-outline" id="dna-tab-learn" onclick="setDNATab('learn')" style="font-size:11px;padding:6px 14px;border:none;color:var(--muted)">📚 Feedback & Lernen</button>
+    <button class="btn btn-outline" id="dna-tab-history" onclick="setDNATab('history')" style="font-size:11px;padding:6px 14px;border:none;color:var(--muted)">🕐 Verlauf</button>
+  </div>
+
+  <!-- TAB: DNA BASIS -->
+  <div id="dna-base">
+    <div class="setup-card">
+      <h3>🎙️ Deine Stimme & Ton</h3>
+      <div class="g2" style="gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">WIE REDEST DU MIT DEINEM PUBLIKUM?</label>
+          <select class="input-field" id="dna-tone" style="cursor:pointer">
+            <option value="direct">Direkt und klar — kein Umweg</option>
+            <option value="motivating">Motivierend und energetisch</option>
+            <option value="educational">Lehrend und geduldig</option>
+            <option value="storytelling">Erzählend, narrativ</option>
+            <option value="challenger">Herausfordernd, unbequem</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">TEMPO DEINER SCRIPTS</label>
+          <select class="input-field" id="dna-pace" style="cursor:pointer">
+            <option value="fast">Schnell — kurze Sätze, viel Energie</option>
+            <option value="medium" selected>Mittel — Balance zwischen Info und Fluss</option>
+            <option value="slow">Langsam — tief, reflektiert, nachdenklich</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">WÖRTER/PHRASEN DIE DU NIE VERWENDEST</label>
+        <input class="input-field" id="dna-never" placeholder="z.B. 'In diesem Video', 'Hey Leute', 'Vergiss nicht zu liken', 'Ehrlich gesagt'...">
+      </div>
+      <div style="margin-bottom:8px">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">WÖRTER DIE DICH BESCHREIBEN</label>
+        <input class="input-field" id="dna-words" placeholder="z.B. ruhig, präzise, direkt, motivierend, analytisch, ehrlich...">
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">DEINE HOOK-FORMEL</label>
+        <select class="input-field" id="dna-hook" style="cursor:pointer">
+          <option value="question">Provokative Frage — "Warum scheitern 95%...?"</option>
+          <option value="statement">Schockierendes Statement — "Niemand sagt dir das..."</option>
+          <option value="result">Ergebnis zuerst — "Ich habe X in Y Tagen gemacht..."</option>
+          <option value="contrast">Kontrast — "Alle machen X. Ich mache Y."</option>
+          <option value="promise">Versprechen — "Nach diesem Video wirst du..."</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="setup-card">
+      <h3>🌍 Deine Werte & Perspektive</h3>
+      <div style="margin-bottom:8px">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">WAS TREIBT DICH AN? (gibt deinem Content Seele)</label>
+        <textarea class="input-field" id="dna-mission" rows="2" style="resize:vertical;width:100%" placeholder="z.B. Ich zeige Menschen dass stille, beharrliche Arbeit mehr erreicht als lautes Reden. Ich komme aus Äthiopien, lebe in Deutschland — ich kenne beide Welten..."></textarea>
+      </div>
+      <div style="margin-bottom:8px">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">DEINE ZIELGRUPPE (wer soll sich angesprochen fühlen?)</label>
+        <input class="input-field" id="dna-audience" placeholder="z.B. Menschen die still arbeiten, Migranten die aufbauen, Tech-Interessierte die anfangen wollen...">
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">WAS MACHT DEINEN CONTENT EINZIGARTIG?</label>
+        <textarea class="input-field" id="dna-unique" rows="2" style="resize:vertical;width:100%" placeholder="z.B. Ich kombiniere Ingenieurs-Denken mit emotionaler Tiefe. Meine Perspektive als Äthiopier in Deutschland gibt mir einen Blickwinkel den kaum ein Creator hat..."></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-red" onclick="saveDNA()">💾 DNA speichern</button>
+      <button class="btn btn-yellow" onclick="generateDNASummary()">🧬 DNA-Zusammenfassung generieren</button>
+    </div>
+    <div id="dna-summary" style="display:none;margin-top:12px">
+      <div class="info-card"><h3>🧬 Deine Creator-DNA</h3><div id="dna-summary-text" class="ai-box" style="margin-top:8px"></div></div>
+    </div>
+  </div>
+
+  <!-- TAB: SCRIPT GENERIEREN -->
+  <div id="dna-gen" style="display:none">
+    <div class="setup-card">
+      <h3>⚡ Script generieren — mit deiner DNA</h3>
+      <p>Gib Thema und Kanal an — ich generiere ein Script das nach dir klingt, nicht nach Claude.</p>
+      <div class="g2" style="gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">KANAL / NISCHE</label>
+          <input class="input-field" id="dna-kanal" placeholder="z.B. The Silent Grind / KI Akte / neuer Kanal...">
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">SPRACHE</label>
+          <select class="input-field" id="dna-lang" style="cursor:pointer">
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="en" selected>🌐 Englisch</option>
+            <option value="am">🇪🇹 Amharisch</option>
+            <option value="es">🇪🇸 Spanisch</option>
+            <option value="ar">🇸🇦 Arabisch</option>
+          </select>
+        </div>
+      </div>
+      <div class="g2" style="gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">VIDEO-THEMA</label>
+          <input class="input-field" id="dna-topic" placeholder="z.B. Warum die meisten Menschen niemals erfolgreich werden">
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">LÄNGE</label>
+          <select class="input-field" id="dna-scriptlen" style="cursor:pointer">
+            <option value="short">Shorts (60 Sek.)</option>
+            <option value="5min">5 Minuten</option>
+            <option value="8min" selected>8 Minuten</option>
+            <option value="12min">12 Minuten</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-red" onclick="genDNAScript()">🎬 Script mit meiner DNA generieren</button>
+    </div>
+    <div id="dna-script-result" style="display:none;margin-top:14px">
+      <div class="info-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <h3>🎬 Dein Script</h3>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-outline" style="font-size:11px" onclick="copyDNAScript()">📋 Kopieren</button>
+            <button class="btn btn-yellow" style="font-size:11px" onclick="sendToLearn()">📚 Feedback geben</button>
+          </div>
+        </div>
+        <div id="dna-script-text" class="ai-box" style="margin-top:0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: FEEDBACK & LERNEN -->
+  <div id="dna-learn" style="display:none">
+    <div class="setup-card">
+      <h3>📚 Script-Feedback — DNA verbessern</h3>
+      <p>Füge ein generiertes Script ein und sag mir was dir nicht gefällt. Ich update deine DNA sofort.</p>
+      <textarea class="input-field" id="learn-script" rows="4" style="resize:vertical;width:100%;margin-bottom:8px" placeholder="Letztes generiertes Script hier einfügen..."></textarea>
+      <div style="margin-bottom:8px">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">WAS HAT DIR NICHT GEFALLEN?</label>
+        <textarea class="input-field" id="learn-feedback" rows="2" style="resize:vertical;width:100%;margin-bottom:8px" placeholder="z.B. 'Zu formell', 'Zu viele Listenpunkte', 'Hook klingt nicht nach mir', 'Zu lang', 'Falsche Energie'..."></textarea>
+      </div>
+      <div style="margin-bottom:8px">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">WAS WAR GUT?</label>
+        <input class="input-field" id="learn-good" placeholder="z.B. 'Der Schluss war stark', 'Die Beispiele haben gepasst'...">
+      </div>
+      <button class="btn btn-red" onclick="updateDNA()">🧬 DNA updaten</button>
+    </div>
+    <div id="learn-result" style="display:none;margin-top:12px">
+      <div class="info-card"><h3>✅ DNA geupdated</h3><div id="learn-result-text" class="ai-box" style="margin-top:8px"></div></div>
+    </div>
+
+    <!-- LERN-HISTORY -->
+    <div class="info-card" style="margin-top:14px">
+      <h3>📊 Was deine DNA bisher gelernt hat</h3>
+      <div id="dna-learned" style="margin-top:8px">
+        <p style="font-size:12px;color:var(--muted)">Noch kein Feedback gegeben. Nach erstem Update erscheint hier was deine DNA gelernt hat.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: VERLAUF -->
+  <div id="dna-history" style="display:none">
+    <div class="info-card">
+      <h3>🕐 Generierte Scripts</h3>
+      <div id="dna-history-list" style="margin-top:8px">
+        <p style="font-size:12px;color:var(--muted)">Noch keine Scripts generiert.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AI-SLOP CHECKER ═══ -->
+<div class="panel" id="panel-slop">
+  <div class="page-hdr"><div><h2>AI-SLOP CHECKER</h2><p>Schütze deinen Kanal vor Demonetarisierung — YouTube 2026 Regeln</p></div></div>
+  <div class="ds-indicator ds-mixed">🔵 Basiert auf bestätigten YouTube 2026 Richtlinien + Inauthentic Content Policy</div>
+
+  <div class="alert alert-red" style="margin-bottom:14px">
+    <span>⚠️</span>
+    <span><strong>Wichtig:</strong> YouTube hat 2026 tausende Faceless-AI-Kanäle demonetarisiert. Die neue "Inauthentic Content Policy" erkennt Massenproduktion automatisch. Dieser Checker prüft ob dein Content sicher ist.</span>
+  </div>
+
+  <!-- INPUT -->
+  <div class="setup-card">
+    <h3>🔍 Video / Kanal-Konzept prüfen</h3>
+    <p>Beschreibe wie du dein Video produzierst — Script, Stimme, Visuals, Editing. Je mehr Details, desto genauer die Analyse.</p>
+    <textarea class="input-field" id="slop-input" rows="4" style="resize:vertical;width:100%;margin-bottom:10px" placeholder="z.B. 'Ich nutze Claude für das Script, ElevenLabs für Voiceover, CapCut für Schnitt. Thema: AI Dokumentation über OpenAI Geschichte. Ich füge eigene Meinung und Recherche hinzu. Kein Gesicht im Video.'"></textarea>
+    <div class="g2" style="margin-bottom:10px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">CONTENT-FORMAT</label>
+        <select class="input-field" id="slop-format" style="cursor:pointer">
+          <option value="faceless_ai">Faceless + AI Voiceover</option>
+          <option value="faceless_own">Faceless + Eigene Stimme</option>
+          <option value="face_ai">Mit Gesicht + AI Tools</option>
+          <option value="avatar">AI Avatar</option>
+          <option value="slideshow">Slideshow / Bilder</option>
+          <option value="screen">Screen Recording</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">UPLOAD-FREQUENZ</label>
+        <select class="input-field" id="slop-freq" style="cursor:pointer">
+          <option value="1">1x pro Woche</option>
+          <option value="3">3x pro Woche</option>
+          <option value="7">Täglich</option>
+          <option value="14">2x täglich oder mehr</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-red" onclick="runSlopCheck()">🛡️ Jetzt prüfen</button>
+      <button class="btn btn-outline" onclick="document.getElementById('slop-input').value='Ich nutze Claude für Script-Entwurf, schreibe es aber komplett um mit eigener Meinung und Recherche. ElevenLabs Voiceover, eigene Thumbnail-Designs, CapCut Schnitt mit Übergängen und Musik. Jedes Video zu einem spezifischen Tech/AI Thema mit eigenem Winkel.'">Beispiel: Dein Setup</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="slop-result" style="display:none">
+
+    <!-- AMPEL -->
+    <div id="slop-ampel" style="margin-bottom:14px;padding:20px;border-radius:6px;text-align:center;border:1px solid var(--border)">
+      <div style="font-size:48px;margin-bottom:8px" id="slop-emoji">—</div>
+      <div style="font-family:var(--display);font-size:28px;letter-spacing:2px" id="slop-verdict">ANALYSIERT</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px" id="slop-verdict-sub"></div>
+    </div>
+
+    <!-- SCORES -->
+    <div class="g4" style="margin-bottom:14px">
+      <div class="stat red"><div class="stat-label">Slop-Risiko</div><div class="stat-val" id="slop-risk">—</div><div class="stat-sub">/10 (0=sicher)</div></div>
+      <div class="stat green"><div class="stat-label">Human Fingerprint</div><div class="stat-val" id="slop-human">—</div><div class="stat-sub">/10</div></div>
+      <div class="stat blue"><div class="stat-label">Originalität</div><div class="stat-val" id="slop-orig">—</div><div class="stat-sub">/10</div></div>
+      <div class="stat yellow"><div class="stat-label">Monetarisierungs-Sicherheit</div><div class="stat-val" id="slop-mono">—</div><div class="stat-sub">/10</div></div>
+    </div>
+
+    <!-- DETAIL CHECKS -->
+    <div class="g2" style="margin-bottom:14px">
+      <div class="info-card">
+        <h3>✅ Was dich schützt</h3>
+        <div id="slop-safe"></div>
+      </div>
+      <div class="info-card">
+        <h3>🚨 Rote Flaggen</h3>
+        <div id="slop-flags"></div>
+      </div>
+    </div>
+
+    <!-- AI DISCLOSURE -->
+    <div class="info-card" style="margin-bottom:14px">
+      <h3>📋 AI-Disclosure — Was du in YouTube Studio markieren musst</h3>
+      <div id="slop-disclosure"></div>
+    </div>
+
+    <!-- KONKRETE FIXES -->
+    <div class="info-card" style="margin-bottom:14px">
+      <h3>🔧 Konkrete Fixes — Was du sofort ändern solltest</h3>
+      <div id="slop-fixes" class="ai-box" style="margin-top:8px"></div>
+    </div>
+
+    <!-- VERGLEICH MIT VIDEO AUS SCREENSHOT -->
+    <div class="info-card">
+      <h3>📊 Dein Content vs. "Legally Binding" Creator</h3>
+      <div style="margin-top:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px">DER CREATOR (36K VIEWS)</div>
+            <div style="font-size:12px;line-height:1.7;color:#aaa">
+              ✓ Eigenes Gesicht — höchster Human Fingerprint<br>
+              ✓ Eigene Meinung + Expertise sichtbar<br>
+              ✓ Echtes Studio Setup<br>
+              ✓ ElevenLabs für Sprachen (transparent)<br>
+              ✓ Community aufgebaut (Skool)<br>
+              ⚠️ Englisch — härterer Markt
+            </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px" id="your-compare-title">DEIN VORTEIL</div>
+            <div style="font-size:12px;line-height:1.7;color:#aaa" id="your-compare-text">Analyse starten um Vergleich zu sehen...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- REGELN ÜBERSICHT -->
+  <div class="info-card">
+    <h3>📚 YouTube 2026 Regeln — Was erlaubt ist und was nicht</h3>
+    <div class="g2" style="margin-top:12px">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:1px;margin-bottom:8px">✅ ERLAUBT</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">✓</span>AI für Script-Entwurf (wenn du es umbaust)</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">✓</span>ElevenLabs / AI Voiceover (mit Disclosure)</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">✓</span>AI-generierte Bilder / B-Roll</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">✓</span>Faceless Format generell</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">✓</span>AI Avatar mit eigenem Content</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">✓</span>Automatische Sprach-Synchronisation (YouTube Feature)</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">✓</span>AI-Tools für Editing und Thumbnails</div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:1px;margin-bottom:8px">❌ VERBOTEN / RISIKO</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--red)">✗</span>Massenproduktion: gleiches Template, nur Titel geändert</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--red)">✗</span>AI Slideshow ohne echte Narration oder Mehrwert</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--red)">✗</span>Copy-Paste AI Scripts ohne eigene Meinung</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--red)">✗</span>Gleiche Struktur, gleiches Pacing in allen Videos</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--red)">✗</span>Kein menschlicher Kontrollprozess sichtbar</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--red)">✗</span>Deepfakes von echten Personen (neues Likeness-Tool)</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--red)">✗</span>Zu hohe Upload-Frequenz ohne Qualitätskontrolle</div>
+      </div>
+    </div>
+    <div class="alert alert-blue" style="margin-top:12px">
+      <span>💡</span>
+      <span style="font-size:12px"><strong>Kern-Regel 2026:</strong> AI ist ein Werkzeug, kein Ersatz für menschliches Urteil. Wenn YouTube nicht erkennen kann ob ein Mensch dahinter steckt, bist du in der Gefahrenzone.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ALERTS ═══ -->
+<div class="panel" id="panel-alerts">
+  <div class="page-hdr"><div><h2>BENACHRICHTIGUNGEN</h2><p>Dein persönlicher Aktivitäts-Feed</p></div><button class="btn btn-outline" onclick="document.getElementById('notif-list').innerHTML='<p style=color:var(--muted);font-size:12px;padding:20px 0>Keine Benachrichtigungen.</p>'">✕ Alle löschen</button></div>
+  <div id="notif-list">
+    <div class="notif"><div class="notif-dot" style="background:var(--blue)"></div><div class="notif-body"><h4>Willkommen in CreatorOS Final</h4><p>Setup → API Keys eingeben → alle Features aktiviert. Starte mit dem Kanal-Analyse Tab.</p><div class="notif-time">Jetzt</div></div></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE & INIT
+// ═══════════════════════════════════════
+const S = {
+  claude: localStorage.getItem('cos_claude')||'',
+  yt: localStorage.getItem('cos_yt')||'',
+  ch: localStorage.getItem('cos_ch')||'',
+  niche: localStorage.getItem('cos_niche')||'AI Dokumentationen'
+};
+
+let abData = {a:null,b:null};
+let uploadData = null;
+
+window.onload = () => {
+  if(S.claude){document.getElementById('k-claude').value='';setStatus('s-claude','✓ gespeichert — neu einfügen zum Ändern',true);}
+  if(S.yt){document.getElementById('k-yt').value='';setStatus('s-yt','✓ gespeichert — neu einfügen zum Ändern',true);}
+  if(S.ch){document.getElementById('k-ch').value=S.ch;setStatus('s-ch','✓ gespeichert',true);}
+  if(S.niche){document.getElementById('k-niche').value=S.niche;setStatus('s-niche','✓ gespeichert',true);}
+  updateAPIStatus();
+  loadProfil();
+  loadDNA();
+  updateProfilBadge();
+  updateBudgetDisplay();
+};
+
+function setStatus(id,msg,ok=false){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.textContent=msg;
+  el.style.color=ok?'var(--green)':'var(--muted)';
+}
+
+function updateAPIStatus(){
+  const parts=[];
+  if(S.claude)parts.push('Claude ✓');
+  if(S.yt)parts.push('YT API ✓');
+  if(S.ch)parts.push('Kanal ✓');
+  document.getElementById('api-status').textContent=parts.length?parts.join(' · '):'APIs: Nicht verbunden';
+}
+
+function setStat(txt){document.getElementById('status-text').textContent=txt;}
+
+function go(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+function saveKey(key,inputId,statusId){
+  const el=document.getElementById(inputId);
+  const val=el.value.trim();
+  // Accept if not all dots and not empty
+  if(!val) return;
+  // If field shows dots (masked), it means already saved - skip
+  if(/^•+$/.test(val)) {
+    setStatus(statusId,'✓ bereits gespeichert',true);
+    return;
+  }
+  localStorage.setItem('cos_'+key,val);
+  S[key]=val;
+  setStatus(statusId,'✓ gespeichert',true);
+  el.value='••••••••';
+  updateAPIStatus();
+}
+
+function addNotif(title,text,type='blue'){
+  const colors={green:'var(--green)',red:'var(--red)',yellow:'var(--yellow)',blue:'var(--blue)'};
+  const el=document.createElement('div');
+  el.className='notif';
+  el.innerHTML=`<div class="notif-dot" style="background:${colors[type]||colors.blue}"></div><div class="notif-body"><h4>${title}</h4><p>${text}</p><div class="notif-time">${new Date().toLocaleTimeString('de-DE')}</div></div>`;
+  const list=document.getElementById('notif-list');
+  list.insertBefore(el,list.firstChild);
+}
+
+// ═══════════════════════════════════════
+// CLAUDE API
+// ═══════════════════════════════════════
+async function claude(userMsg, system='', images=[]) {
+  if(!S.claude) return '⚠️ Claude API Key im Setup eingeben.';
+  const content = [];
+  images.forEach(img=>content.push({type:'image',source:{type:'base64',media_type:img.type,data:img.data}}));
+  content.push({type:'text',text:userMsg});
+  const body={model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content}]};
+  if(system)body.system=system;
+  try{
+    const proxyUrl=window.location.hostname==='localhost'?'https://api.anthropic.com/v1/messages':'/api/claude';
+    const r=await fetch(proxyUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    if(d.error)return '⚠️ '+d.error.message;
+    // Track cost based on token usage
+    if(d.usage){
+      const cost=((d.usage.input_tokens||0)*0.000003)+((d.usage.output_tokens||0)*0.000015);
+      trackCost('claude',cost,'Claude Analyse');
+    }
+    return d.content?.[0]?.text||'Keine Antwort.';
+  }catch(e){return '⚠️ Fehler: '+e.message;}
+}
+
+async function claudeJSON(prompt,system=''){
+  const raw=await claude(prompt,system);
+  try{return JSON.parse(raw.replace(/```json|```/g,'').trim());}
+  catch{return null;}
+}
+
+// ═══════════════════════════════════════
+// YOUTUBE API
+// ═══════════════════════════════════════
+async function ytAPI(ep,params){
+  if(!S.yt)return null;
+  const url=new URL(`https://www.googleapis.com/youtube/v3/${ep}`);
+  url.searchParams.set('key',S.yt);
+  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  try{const r=await fetch(url);return r.json();}catch{return null;}
+}
+
+function fmtNum(n){
+  n=parseInt(n)||0;
+  if(n>=1e6)return(n/1e6).toFixed(1)+'M';
+  if(n>=1e3)return(n/1e3).toFixed(1)+'K';
+  return n.toString();
+}
+
+// ═══════════════════════════════════════
+// SETUP TEST
+// ═══════════════════════════════════════
+async function testAll(){
+  const el=document.getElementById('test-result');
+  el.style.display='block';el.className='ai-box loading';el.textContent='Teste...';
+  const lines=[];
+  if(S.claude){
+    const r=await claude('Antworte nur: "OK"');
+    lines.push(r.includes('OK')?'✅ Claude API — verbunden':'❌ Claude API — Fehler: '+r);
+  }else lines.push('⚠️ Claude API Key fehlt');
+  if(S.yt) lines.push('✅ YouTube API Key — vorhanden (wird beim Laden getestet)');
+  else lines.push('⚠️ YouTube API Key fehlt');
+  if(S.ch) lines.push('✅ Kanal-ID — '+S.ch);
+  else lines.push('⚠️ Kanal-ID fehlt');
+  lines.push('✅ Nische: '+S.niche);
+  el.className='ai-box';el.textContent=lines.join('\n');
+  updateAPIStatus();
+}
+
+// ═══════════════════════════════════════
+// AI-SLOP CHECKER
+// ═══════════════════════════════════════
+async function runSlopCheck(){
+  const input=document.getElementById('slop-input').value.trim();
+  if(!input){alert('Beschreibe deinen Content-Prozess');return;}
+  const format=document.getElementById('slop-format').value;
+  const freq=document.getElementById('slop-freq').value;
+
+  setStat('PRÜFT...');
+  document.getElementById('slop-result').style.display='block';
+  document.getElementById('slop-fixes').className='ai-box loading';
+  document.getElementById('slop-fixes').textContent='Analysiere...';
+
+  const formatLabels={faceless_ai:'Faceless + AI Voiceover',faceless_own:'Faceless + Eigene Stimme',face_ai:'Mit Gesicht + AI Tools',avatar:'AI Avatar',slideshow:'Slideshow',screen:'Screen Recording'};
+
+  const j=await claudeJSON(`Du bist ein YouTube Policy Experte 2026. Analysiere diesen Creator-Workflow auf Demonetarisierungs-Risiko basierend auf der "Inauthentic Content Policy" 2026:\n\nWorkflow: "${input}"\nFormat: ${formatLabels[format]}\nUpload-Frequenz: ${freq}x pro Woche\nNische: ${S.niche}${getProfilContext()}\n\nNUR JSON:\n{"slop_risk":3,"human_fingerprint":8,"originality":7,"monetization_safety":8,"verdict":"SICHER|RISIKO|GEFAHR","verdict_text":"2 Sätze Einschätzung","safe_factors":["Schutz1","Schutz2","Schutz3"],"red_flags":["Flag1","Flag2"],"disclosure_needed":["Was in YT Studio markiert werden muss"],"fixes":"3-5 konkrete Verbesserungen die sofort umsetzbar sind","your_advantage":"Dein Vorteil gegenüber dem Konkurrenten der 36K Views in 3 Tagen gemacht hat (2-3 Sätze)"}`,'YouTube 2026 Policy Experte. NUR JSON. Basiere auf echter Inauthentic Content Policy.');
+
+  if(!j){document.getElementById('slop-fixes').className='ai-box';document.getElementById('slop-fixes').textContent='Fehler — Claude API Key prüfen';setStat('BEREIT');return;}
+
+  // Ampel
+  const ampel=document.getElementById('slop-ampel');
+  const emoji={SICHER:'🟢',RISIKO:'🟡',GEFAHR:'🔴'};
+  const ampelBg={SICHER:'rgba(0,232,122,0.08)',RISIKO:'rgba(255,208,0,0.08)',GEFAHR:'rgba(255,49,49,0.08)'};
+  const ampelBorder={SICHER:'rgba(0,232,122,0.3)',RISIKO:'rgba(255,208,0,0.3)',GEFAHR:'rgba(255,49,49,0.3)'};
+  ampel.style.background=ampelBg[j.verdict]||ampelBg.RISIKO;
+  ampel.style.borderColor=ampelBorder[j.verdict]||ampelBorder.RISIKO;
+  document.getElementById('slop-emoji').textContent=emoji[j.verdict]||'🟡';
+  document.getElementById('slop-verdict').textContent=j.verdict==='SICHER'?'KANAL SICHER':j.verdict==='RISIKO'?'RISIKO VORHANDEN':'GEFAHR — SOFORT HANDELN';
+  document.getElementById('slop-verdict-sub').textContent=j.verdict_text||'';
+
+  // Scores
+  document.getElementById('slop-risk').textContent=j.slop_risk||'—';
+  document.getElementById('slop-human').textContent=j.human_fingerprint||'—';
+  document.getElementById('slop-orig').textContent=j.originality||'—';
+  document.getElementById('slop-mono').textContent=j.monetization_safety||'—';
+
+  // Safe factors
+  document.getElementById('slop-safe').innerHTML=(j.safe_factors||[]).map(s=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">✓</span>${s}</div>`).join('');
+
+  // Red flags
+  document.getElementById('slop-flags').innerHTML=(j.red_flags||[]).length>0
+    ?(j.red_flags||[]).map(f=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--red)">⚠️</span>${f}</div>`).join('')
+    :'<div style="font-size:12px;color:var(--green);padding:8px 0">Keine roten Flaggen gefunden ✓</div>';
+
+  // Disclosure
+  document.getElementById('slop-disclosure').innerHTML=`
+    <div style="margin-top:8px">
+      ${(j.disclosure_needed||['Altered/synthetic content toggle aktivieren wenn AI Voiceover genutzt']).map(d=>`
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start">
+          <span class="badge b-yellow">PFLICHT</span>
+          <span style="font-size:12px">${d}</span>
+        </div>`).join('')}
+      <div style="padding:8px 0;font-size:11px;color:var(--muted)">→ YouTube Studio → Video bearbeiten → Details → "Wurde dieser Inhalt mit KI verändert?" → Ja, aktivieren</div>
+    </div>`;
+
+  // Fixes
+  document.getElementById('slop-fixes').className='ai-box';
+  document.getElementById('slop-fixes').textContent=j.fixes||'Keine kritischen Fixes nötig.';
+
+  // Your advantage vs competitor
+  document.getElementById('your-compare-title').textContent='DEIN VORTEIL ('+S.niche+')';
+  document.getElementById('your-compare-text').textContent=j.your_advantage||'Analyse abgeschlossen.';
+
+  addNotif('AI-Slop Check',`Verdict: ${j.verdict} | Risiko: ${j.slop_risk}/10 | Human Score: ${j.human_fingerprint}/10`,j.verdict==='SICHER'?'green':j.verdict==='RISIKO'?'yellow':'red');
+  setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// CREATOR PROFIL
+// ═══════════════════════════════════════
+let PROFIL = JSON.parse(localStorage.getItem('cos_profil')||'{}');
+let kanalCount = 3;
+
+function loadProfil(){
+  if(!PROFIL||!PROFIL.name) return;
+  // Personal
+  if(PROFIL.name) document.getElementById('p-name').value=PROFIL.name;
+  if(PROFIL.country) document.getElementById('p-country').value=PROFIL.country;
+  if(PROFIL.expertise) document.getElementById('p-expertise').value=PROFIL.expertise;
+  if(PROFIL.style) document.getElementById('p-style').value=PROFIL.style;
+  // Tools
+  if(PROFIL.script) document.getElementById('p-script').value=PROFIL.script;
+  if(PROFIL.voice) document.getElementById('p-voice').value=PROFIL.voice;
+  if(PROFIL.video) document.getElementById('p-video').value=PROFIL.video;
+  if(PROFIL.edit) document.getElementById('p-edit').value=PROFIL.edit;
+  if(PROFIL.thumb) document.getElementById('p-thumb').value=PROFIL.thumb;
+  // Goals
+  if(PROFIL.goalTime) document.getElementById('p-goal-time').value=PROFIL.goalTime;
+  if(PROFIL.goalRev) document.getElementById('p-goal-rev').value=PROFIL.goalRev;
+  // Kanäle
+  if(PROFIL.kanale){
+    PROFIL.kanale.forEach((k,i)=>{
+      if(i>2) addKanal();
+      const n=document.getElementById(`k${i}-name`);
+      const ni=document.getElementById(`k${i}-niche`);
+      const l=document.getElementById(`k${i}-lang`);
+      const f=document.getElementById(`k${i}-freq`);
+      const u=document.getElementById(`k${i}-url`);
+      if(n)n.value=k.name||'';
+      if(ni)ni.value=k.niche||'';
+      if(l)l.value=k.lang||'en';
+      if(f)f.value=k.freq||'1';
+      if(u)u.value=k.url||'';
+    });
+  }
+  // Markets
+  if(PROFIL.markets){
+    document.querySelectorAll('#p-markets input').forEach(cb=>{
+      cb.checked=PROFIL.markets.includes(cb.value);
+    });
+  }
+}
+
+function addKanal(){
+  const i=kanalCount++;
+  const div=document.createElement('div');
+  div.className='kanal-entry';div.id=`ke-${i}`;
+  div.style.cssText='background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:10px';
+  div.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px">KANAL ${i+1} — GEPLANT</span>
+      <button onclick="this.closest('.kanal-entry').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">✕ Entfernen</button>
+    </div>
+    <div class="g2" style="gap:8px;margin-bottom:8px">
+      <input class="input-field" id="k${i}-name" placeholder="Kanal-Name">
+      <input class="input-field" id="k${i}-niche" placeholder="Nische">
+    </div>
+    <div class="g2" style="gap:8px;margin-bottom:8px">
+      <select class="input-field" id="k${i}-lang" style="cursor:pointer">
+        <option value="de">🇩🇪 Deutsch</option><option value="en">🌐 Englisch</option>
+        <option value="both">Beide</option><option value="am">🇪🇹 Amharisch</option><option value="es">🇪🇸 Spanisch</option>
+      </select>
+      <select class="input-field" id="k${i}-freq" style="cursor:pointer">
+        <option value="1">1x/Woche</option><option value="2">2x/Woche</option><option value="3">3x/Woche</option>
+      </select>
+    </div>
+    <input class="input-field" id="k${i}-url" placeholder="YouTube URL" style="font-size:11px">`;
+  document.getElementById('kanal-list').appendChild(div);
+}
+
+async function saveProfil(){
+  // Kanäle sammeln
+  const kanale=[];
+  document.querySelectorAll('.kanal-entry').forEach((el,i)=>{
+    const n=el.querySelector(`[id$="-name"]`)?.value;
+    if(n) kanale.push({
+      name:n,
+      niche:el.querySelector(`[id$="-niche"]`)?.value||'',
+      lang:el.querySelector(`[id$="-lang"]`)?.value||'en',
+      freq:el.querySelector(`[id$="-freq"]`)?.value||'1',
+      url:el.querySelector(`[id$="-url"]`)?.value||''
+    });
+  });
+
+  const markets=[...document.querySelectorAll('#p-markets input:checked')].map(c=>c.value);
+
+  PROFIL={
+    name:document.getElementById('p-name').value,
+    country:document.getElementById('p-country').value,
+    expertise:document.getElementById('p-expertise').value,
+    style:document.getElementById('p-style').value,
+    script:document.getElementById('p-script').value,
+    voice:document.getElementById('p-voice').value,
+    video:document.getElementById('p-video').value,
+    edit:document.getElementById('p-edit').value,
+    thumb:document.getElementById('p-thumb').value,
+    goalTime:document.getElementById('p-goal-time').value,
+    goalRev:document.getElementById('p-goal-rev').value,
+    kanale,markets
+  };
+
+  localStorage.setItem('cos_profil',JSON.stringify(PROFIL));
+
+  // Nische aus Kanal 1 ins globale State
+  if(kanale[0]?.niche){
+    S.niche=kanale[0].niche;
+    localStorage.setItem('cos_niche',S.niche);
+  }
+
+  // KI Zusammenfassung
+  document.getElementById('profil-preview').style.display='block';
+  const sumEl=document.getElementById('profil-summary');
+  sumEl.className='ai-box loading';sumEl.textContent='Erstelle persönliche Strategie...';
+
+  const kanalText=kanale.map((k,i)=>`Kanal ${i+1}: "${k.name}" — ${k.niche} (${k.lang}, ${k.freq}x/Woche)`).join('\n');
+
+  const summary=await claude(
+    `Du kennst jetzt diesen Creator vollständig:\nName: ${PROFIL.name}\nHerkunft/Wohnort: ${PROFIL.country}\nExpertise: ${PROFIL.expertise}\nProduktionsstil: ${PROFIL.style}\nTools: Script=${PROFIL.script}, Voice=${PROFIL.voice}, Video=${PROFIL.video}, Edit=${PROFIL.edit}\nZielmärkte: ${markets.join(', ')}\nEinnahmen-Ziel: €${PROFIL.goalRev}/Monat in ${PROFIL.goalTime} Monaten\n\nKanäle:\n${kanalText}\n\nGib eine persönliche Strategie in 5-6 Sätzen. Direkt an ${PROFIL.name||'dich'} gerichtet. Konkrete Prioritäten. Was als erstes, was als zweites. Ehrlich, kein Floskeln. Auf Deutsch.`,
+    'Du bist ein persönlicher YouTube-Stratege. Direkt, ehrlich, personalisiert.'
+  );
+
+  sumEl.className='ai-box';sumEl.textContent=summary;
+  updateProfilBadge();
+  addNotif('Profil gespeichert',`${kanale.length} Kanäle · Märkte: ${markets.join(', ')} · Ziel: €${PROFIL.goalRev}/Mo`,'green');
+}
+
+function updateProfilBadge(){
+  if(!PROFIL?.name) return;
+  // Update sidebar brand mit Namen
+  const brand=document.querySelector('.brand p');
+  if(brand) brand.textContent=PROFIL.name.toUpperCase()+' · CREATOR HUB';
+}
+
+function getProfilContext(){
+  if(!PROFIL?.name) return '';
+  const k=(PROFIL.kanale||[]).map(k=>`"${k.name}" (${k.niche})`).join(', ');
+  return `\n\nCREATOR PROFIL:\nName: ${PROFIL.name}, Expertise: ${PROFIL.expertise}, Märkte: ${(PROFIL.markets||[]).join('/')}, Kanäle: ${k}, Tools: ${PROFIL.voice}+${PROFIL.edit}, Ziel: €${PROFIL.goalRev}/Mo`;
+}
+
+// ═══════════════════════════════════════
+// KOSTEN-RECHNER
+// ═══════════════════════════════════════
+const EL_PLANS={
+  free:{chars:10000,monthly:0,perChar:0},
+  starter:{chars:30000,monthly:5,perChar:0.0001667},
+  creator:{chars:100000,monthly:22,perChar:0.00022},
+  pro:{chars:500000,monthly:99,perChar:0.000198}
+};
+const FLOW_COST=0.05; // per clip estimate
+const CLAUDE_PER_TOKEN=0.000003;
+
+function saveBudget(){
+  setBudgetFromInput();
+  localStorage.setItem('cos_budget',JSON.stringify({
+    claude:parseFloat(document.getElementById('b-claude').value)||5,
+    el:document.getElementById('b-el').value,
+    flow:parseInt(document.getElementById('b-flow').value)||100,
+    capcut:document.getElementById('b-capcut').value
+  }));
+  document.getElementById('b-saved').textContent='✓ gespeichert';
+  document.getElementById('b-saved').style.color='var(--green)';
+}
+
+async function calcCosts(withAI=false){
+  const script=document.getElementById('cost-script').value.trim();
+  const len=parseInt(document.getElementById('cost-len').value);
+  const scenes=parseInt(document.getElementById('cost-scenes').value);
+
+  // Zeichenzahl
+  const chars=script.length||len*150*6; // estimate 150wpm * 6chars/word
+  const words=script.split(' ').length||len*150;
+  const tokens=Math.round(chars/4);
+
+  // Kosten berechnen
+  const claudeCost=(tokens*2)*CLAUDE_PER_TOKEN; // input+output
+  const elPlan=EL_PLANS[document.getElementById('b-el').value]||EL_PLANS.starter;
+  const elChars=chars;
+  const elCost=elPlan.monthly>0?(elChars/elPlan.chars)*elPlan.monthly:0;
+  const flowCredits=scenes;
+  const flowCost=flowCredits*FLOW_COST;
+  const capcutCost=document.getElementById('b-capcut').value==='pro'?0.33:0; // daily cost of pro
+  const total=claudeCost+elCost+flowCost+capcutCost;
+
+  // Budget
+  const budget=JSON.parse(localStorage.getItem('cos_budget')||'{"claude":5,"flow":100}');
+  const claudeVideos=Math.floor(budget.claude/claudeCost)||0;
+  const flowVideos=Math.floor(budget.flow/flowCredits)||0;
+  const limitingFactor=Math.min(claudeVideos,flowVideos);
+
+  document.getElementById('cost-result').style.display='block';
+  document.getElementById('c-claude').textContent='$'+claudeCost.toFixed(4);
+  document.getElementById('c-el').textContent=elChars.toLocaleString();
+  document.getElementById('c-flow').textContent=flowCredits+' Credits';
+  document.getElementById('c-total').textContent='~$'+total.toFixed(3);
+
+  document.getElementById('cost-breakdown').innerHTML=`
+    <table class="data-table" style="margin-top:8px">
+      <thead><tr><th>Tool</th><th>Was verbraucht wird</th><th>Kosten</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Claude API</td><td>~${tokens.toLocaleString()} Tokens</td><td>$${claudeCost.toFixed(4)}</td><td><span class="badge b-green">OK</span></td></tr>
+        <tr><td>ElevenLabs</td><td>${elChars.toLocaleString()} Zeichen</td><td>${elCost>0?'$'+elCost.toFixed(3):'Inklusive im Plan'}</td><td><span class="badge ${elChars>elPlan.chars?'b-red':'b-green'}">${elChars>elPlan.chars?'LIMIT ÜBERSCHRITTEN':'OK'}</span></td></tr>
+        <tr><td>Google Flow / Kling</td><td>${flowCredits} Clips/Szenen</td><td>~$${flowCost.toFixed(2)} (geschätzt)</td><td><span class="badge b-yellow">SCHÄTZUNG</span></td></tr>
+        <tr><td>CapCut Pro</td><td>Unbegrenzt</td><td>${capcutCost>0?'~$'+capcutCost.toFixed(2)+'/Video':'$0 (monatl. Abo)'}</td><td><span class="badge b-green">OK</span></td></tr>
+        <tr style="font-weight:700"><td>GESAMT</td><td>${words.toLocaleString()} Wörter · ${len} Min.</td><td>~$${total.toFixed(3)}</td><td></td></tr>
+      </tbody>
+    </table>`;
+
+  document.getElementById('cost-reach').innerHTML=`
+    <div class="g2" style="margin-top:10px;gap:10px">
+      <div style="background:var(--surface);border-radius:4px;padding:12px;text-align:center">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:4px">CLAUDE ($${budget.claude} GUTHABEN)</div>
+        <div style="font-size:24px;font-weight:700;color:var(--green)">${claudeVideos} Videos</div>
+        <div style="font-size:11px;color:var(--muted)">bis Guthaben aufgebraucht</div>
+      </div>
+      <div style="background:var(--surface);border-radius:4px;padding:12px;text-align:center">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:4px">FLOW/KLING (${budget.flow} Credits)</div>
+        <div style="font-size:24px;font-weight:700;color:var(--blue)">${flowVideos} Videos</div>
+        <div style="font-size:11px;color:var(--muted)">bis Credits aufgebraucht</div>
+      </div>
+    </div>
+    <div class="alert ${limitingFactor<5?'alert-yellow':'alert-green'}" style="margin-top:10px">
+      <span>${limitingFactor<5?'⚠️':'✅'}</span>
+      <span style="font-size:12px">Du kannst noch ca. <strong style="color:white">${limitingFactor} Videos</strong> mit diesem Setup produzieren. ${limitingFactor<5?'Guthaben bald aufgebraucht — aufladen empfohlen.':'Genug Guthaben für die nächsten Wochen.'}</span>
+    </div>`;
+
+  if(withAI&&S.claude){
+    document.getElementById('cost-ai-tip').style.display='block';
+    const tipEl=document.getElementById('cost-ai-text');tipEl.className='ai-box loading';tipEl.textContent='...';
+    const tip=await claude(`Ein Creator produziert ${len}-Minuten Videos. Kosten pro Video: Claude $${claudeCost.toFixed(4)}, ElevenLabs ${elChars} Zeichen, ${flowCredits} Flow/Kling Credits. Gesamtbudget: $${budget.claude} Claude, ${budget.flow} Flow Credits.\n\nGib 3 konkrete Tipps wie er die Kosten reduziert ohne Qualität zu verlieren. Direkt, auf Deutsch.`,'Cost Optimierungs-Experte.');
+    tipEl.className='ai-box';tipEl.textContent=tip;
+  }
+  addNotif('Kosten berechnet',`${len} Min. Video = ~$${total.toFixed(3)} | Noch ${limitingFactor} Videos möglich`,limitingFactor<5?'yellow':'green');
+}
+
+// ═══════════════════════════════════════
+// CREATOR DNA
+// ═══════════════════════════════════════
+let DNA = JSON.parse(localStorage.getItem('cos_dna')||'{}');
+let dnaHistory = JSON.parse(localStorage.getItem('cos_dna_history')||'[]');
+
+function setDNATab(tab){
+  ['base','gen','learn','history'].forEach(t=>{
+    document.getElementById('dna-'+t).style.display=t===tab?'block':'none';
+    const btn=document.getElementById('dna-tab-'+t);
+    if(btn){btn.className='btn '+(t===tab?'btn-red':'btn-outline');btn.style.border=t===tab?'none':'none';btn.style.color=t===tab?'white':'var(--muted)';}
+  });
+}
+
+function loadDNA(){
+  if(!DNA||!DNA.tone)return;
+  if(DNA.tone)document.getElementById('dna-tone').value=DNA.tone;
+  if(DNA.pace)document.getElementById('dna-pace').value=DNA.pace;
+  if(DNA.never)document.getElementById('dna-never').value=DNA.never;
+  if(DNA.words)document.getElementById('dna-words').value=DNA.words;
+  if(DNA.hook)document.getElementById('dna-hook').value=DNA.hook;
+  if(DNA.mission)document.getElementById('dna-mission').value=DNA.mission;
+  if(DNA.audience)document.getElementById('dna-audience').value=DNA.audience;
+  if(DNA.unique)document.getElementById('dna-unique').value=DNA.unique;
+  renderDNALearned();
+}
+
+function saveDNA(){
+  DNA={
+    tone:document.getElementById('dna-tone').value,
+    pace:document.getElementById('dna-pace').value,
+    never:document.getElementById('dna-never').value,
+    words:document.getElementById('dna-words').value,
+    hook:document.getElementById('dna-hook').value,
+    mission:document.getElementById('dna-mission').value,
+    audience:document.getElementById('dna-audience').value,
+    unique:document.getElementById('dna-unique').value,
+    learned:DNA.learned||[],
+    updatedAt:new Date().toLocaleDateString('de-DE')
+  };
+  localStorage.setItem('cos_dna',JSON.stringify(DNA));
+  addNotif('DNA gespeichert','Creator-DNA lokal gespeichert','green');
+}
+
+function getDNAPrompt(){
+  if(!DNA||!DNA.tone) return '';
+  return `\n\nCREATOR DNA (unveränderlich für alle Kanäle):\n- Ton: ${DNA.tone}\n- Tempo: ${DNA.pace}\n- NIEMALS diese Wörter: ${DNA.never}\n- Mich beschreibende Wörter: ${DNA.words}\n- Hook-Formel: ${DNA.hook}\n- Mission: ${DNA.mission}\n- Zielgruppe: ${DNA.audience}\n- Was mich einzigartig macht: ${DNA.unique}\n${DNA.learned?.length?'- Gelernt aus Feedback: '+DNA.learned.slice(-5).join('; '):''}`;
+}
+
+async function generateDNASummary(){
+  saveDNA();
+  document.getElementById('dna-summary').style.display='block';
+  const el=document.getElementById('dna-summary-text');el.className='ai-box loading';el.textContent='...';
+  const r=await claude(`Basierend auf dieser Creator-DNA erstelle einen prägnanten Masterprompt-Kern (150-200 Wörter) der als Basis für ALLE Scripts dieses Creators dient:\n${getDNAPrompt()}\n\nDer Masterprompt soll: den Ton definieren, verbotene Phrasen einschließen, die Hook-Formel verankern, die Mission widerspiegeln. Er soll für jeden neuen Kanal als Grundlage nutzbar sein.`,'Masterprompt Architekt. Direkt, präzise.');
+  el.className='ai-box';el.textContent=r;
+  addNotif('DNA-Zusammenfassung','Masterprompt-Kern generiert','green');
+}
+
+async function genDNAScript(){
+  const topic=document.getElementById('dna-topic').value.trim();
+  const kanal=document.getElementById('dna-kanal').value.trim();
+  const lang=document.getElementById('dna-lang').value;
+  const len=document.getElementById('dna-scriptlen').value;
+  if(!topic){alert('Thema eingeben');return;}
+
+  setStat('GENERIERT...');
+  document.getElementById('dna-script-result').style.display='block';
+  const el=document.getElementById('dna-script-text');el.className='ai-box loading';el.textContent='...';
+
+  const langInstr={de:'Auf Deutsch.',en:'In English.',am:'In Amharic (አማርኛ).',es:'En español.',ar:'باللغة العربية.'};
+  const lenInstr={short:'60 Sekunden Shorts Script.','5min':'5 Minuten Script.','8min':'8 Minuten Script (ca. 1200 Wörter).','12min':'12 Minuten Script (ca. 1800 Wörter).'};
+
+  const script=await claude(
+    `Schreibe ein YouTube Script für Kanal: "${kanal||S.niche}".\nThema: "${topic}"\nLänge: ${lenInstr[len]||'8 Minuten.'}\nSprache: ${langInstr[lang]||'Englisch.'}\n\nWICHTIG — Das ist die Creator-DNA die du IMMER respektierst:${getDNAPrompt()}${getProfilContext()}\n\nStruktur: [HOOK], [HAUPTTEIL mit 3 klaren Punkten], [CTA]\nKlinge wie der Creator — nicht wie eine KI. Setze die DNA konsequent um.`,
+    'Du bist der persönliche Ghostwriter dieses Creators. Du kennst seine DNA besser als er selbst. Scripts klingen IMMER wie er.'
+  );
+  el.className='ai-box';el.textContent=script;
+
+  // In History speichern
+  dnaHistory.unshift({topic,kanal,lang,len,date:new Date().toLocaleDateString('de-DE'),preview:script.substring(0,100)});
+  if(dnaHistory.length>20)dnaHistory=dnaHistory.slice(0,20);
+  localStorage.setItem('cos_dna_history',JSON.stringify(dnaHistory));
+  renderHistory();
+  addNotif('Script generiert',`"${topic}" — ${len}`,  'green');
+  setStat('AKTIV');
+}
+
+function copyDNAScript(){
+  const txt=document.getElementById('dna-script-text').textContent;
+  navigator.clipboard.writeText(txt).catch(()=>{});
+  addNotif('Kopiert','Script in Zwischenablage','blue');
+}
+
+function sendToLearn(){
+  const txt=document.getElementById('dna-script-text').textContent;
+  document.getElementById('learn-script').value=txt;
+  setDNATab('learn');
+}
+
+async function updateDNA(){
+  const script=document.getElementById('learn-script').value.trim();
+  const bad=document.getElementById('learn-feedback').value.trim();
+  const good=document.getElementById('learn-good').value.trim();
+  if(!bad&&!good){alert('Mindestens ein Feedback eingeben');return;}
+
+  setStat('LERNT...');
+  const el=document.getElementById('learn-result');el.style.display='block';
+  const txt=document.getElementById('learn-result-text');txt.className='ai-box loading';txt.textContent='...';
+
+  const r=await claude(
+    `Ein Creator gibt Feedback zu seinem generierten Script.\nWAS NICHT GUT WAR: "${bad}"\nWAS GUT WAR: "${good}"\n\nBasierend auf diesem Feedback:\n1) Identifiziere 2-3 konkrete DNA-Regeln die geupdated werden sollen\n2) Formuliere sie als klare Anweisungen für zukünftige Scripts\n3) Was bleibt gleich\n\nAuf Deutsch, kurz und konkret.`,
+    'DNA Lern-System. Extrahiere konkrete Regeln aus Feedback.'
+  );
+
+  // Lernergebnis zur DNA hinzufügen
+  if(!DNA.learned)DNA.learned=[];
+  DNA.learned.push(`[${new Date().toLocaleDateString('de-DE')}] Nicht: ${bad.substring(0,50)} | Gut: ${good.substring(0,50)}`);
+  if(DNA.learned.length>20)DNA.learned=DNA.learned.slice(-20);
+  localStorage.setItem('cos_dna',JSON.stringify(DNA));
+
+  txt.className='ai-box';txt.textContent=r;
+  renderDNALearned();
+  addNotif('DNA gelernt','Masterprompt verbessert basierend auf deinem Feedback','green');
+  setStat('AKTIV');
+}
+
+function renderDNALearned(){
+  const el=document.getElementById('dna-learned');if(!el)return;
+  if(!DNA.learned?.length){el.innerHTML='<p style="font-size:12px;color:var(--muted)">Noch kein Feedback gegeben.</p>';return;}
+  el.innerHTML=DNA.learned.slice(-8).reverse().map(l=>`
+    <div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;color:#aaa;display:flex;gap:6px">
+      <span style="color:var(--green);flex-shrink:0">📚</span>${l}
+    </div>`).join('');
+}
+
+function renderHistory(){
+  const el=document.getElementById('dna-history-list');if(!el)return;
+  if(!dnaHistory.length){el.innerHTML='<p style="font-size:12px;color:var(--muted)">Noch keine Scripts.</p>';return;}
+  el.innerHTML=dnaHistory.map((h,i)=>`
+    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;font-weight:700">${h.topic}</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${h.date}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">${h.kanal} · ${h.lang} · ${h.len}</div>
+      <div style="font-size:11px;color:#666;margin-top:3px;font-style:italic">${h.preview}...</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════
+// LIVE BUDGET TRACKER
+// ═══════════════════════════════════════
+let BUDGET = JSON.parse(localStorage.getItem('cos_live_budget')||'{"claude":5.00,"claudeStart":5.00,"flow":100,"flowStart":100}');
+
+function updateBudgetDisplay(){
+  const claudePct=Math.max(0,Math.min(100,(BUDGET.claude/BUDGET.claudeStart)*100));
+  const flowPct=Math.max(0,Math.min(100,(BUDGET.flow/BUDGET.flowStart)*100));
+  const claudeColor=claudePct>50?'var(--green)':claudePct>20?'var(--yellow)':'var(--red)';
+  const flowColor=flowPct>50?'var(--blue)':flowPct>20?'var(--yellow)':'var(--red)';
+
+  const claudeEl=document.getElementById('budget-claude-live');
+  const flowEl=document.getElementById('budget-flow-live');
+  const claudeBar=document.getElementById('budget-claude-bar');
+  const flowBar=document.getElementById('budget-flow-bar');
+
+  if(claudeEl) claudeEl.textContent='$'+BUDGET.claude.toFixed(3);
+  if(flowEl) flowEl.textContent=BUDGET.flow+' Credits';
+  if(claudeBar){claudeBar.style.width=claudePct+'%';claudeBar.style.background=claudeColor;}
+  if(flowEl) flowEl.style.color=flowColor;
+
+  // Warnung wenn niedrig
+  if(claudePct<20&&claudePct>0){
+    addNotif('⚠️ Claude Guthaben niedrig','Nur noch $'+BUDGET.claude.toFixed(3)+' übrig — bald aufladen','red');
+  }
+}
+
+function trackCost(tool, amount, label){
+  if(tool==='claude'){
+    BUDGET.claude=Math.max(0,BUDGET.claude-amount);
+  } else if(tool==='flow'){
+    BUDGET.flow=Math.max(0,BUDGET.flow-amount);
+  }
+  localStorage.setItem('cos_live_budget',JSON.stringify(BUDGET));
+  const lastEl=document.getElementById('last-cost');
+  if(lastEl) lastEl.textContent='-$'+amount.toFixed(4)+' ('+label+')';
+  updateBudgetDisplay();
+}
+
+function setBudgetFromInput(){
+  const claudeInput=document.getElementById('b-claude');
+  const flowInput=document.getElementById('b-flow');
+  if(claudeInput){
+    const val=parseFloat(claudeInput.value)||5;
+    BUDGET.claude=val;
+    BUDGET.claudeStart=val;
+  }
+  if(flowInput){
+    const val=parseInt(flowInput.value)||100;
+    BUDGET.flow=val;
+    BUDGET.flowStart=val;
+  }
+  localStorage.setItem('cos_live_budget',JSON.stringify(BUDGET));
+  updateBudgetDisplay();
+}
+
+// ═══════════════════════════════════════
+// KANAL
+// ═══════════════════════════════════════
+async function loadChannel(){
+  setStat('LÄDT...');
+  if(!S.yt||!S.ch){
+    document.getElementById('ch-ai').textContent='YouTube API Key + Kanal-ID im Setup eingeben.';
+    setStat('BEREIT');return;
+  }
+  const d=await ytAPI('channels',{part:'snippet,statistics',id:S.ch});
+  if(!d?.items?.[0]){document.getElementById('ch-ai').textContent='Kanal nicht gefunden. ID prüfen.';setStat('BEREIT');return;}
+  const ch=d.items[0];const st=ch.statistics;
+  document.getElementById('ch-subs').textContent=fmtNum(st.subscriberCount);
+  document.getElementById('ch-views').textContent=fmtNum(st.viewCount);
+  document.getElementById('ch-vids').textContent=fmtNum(st.videoCount);
+  const subs=parseInt(st.subscriberCount)||0;const views=parseInt(st.viewCount)||0;const vc=parseInt(st.videoCount)||1;
+  const score=Math.min(10,Math.round((views/vc/Math.max(subs,1))*8+(subs>1000?2:0)));
+  document.getElementById('ch-score').textContent=score;
+
+  const vids=await ytAPI('search',{part:'snippet',channelId:S.ch,order:'date',maxResults:5,type:'video'});
+  if(vids?.items){
+    document.getElementById('ch-recent').innerHTML=vids.items.map(v=>`
+      <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
+        <img src="${v.snippet.thumbnails.default.url}" style="width:56px;border-radius:3px;flex-shrink:0">
+        <div><div style="font-size:11px;font-weight:600;line-height:1.4">${v.snippet.title.substring(0,55)}${v.snippet.title.length>55?'...':''}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${new Date(v.snippet.publishedAt).toLocaleDateString('de-DE')}</div></div>
+      </div>`).join('');
+  }
+
+  const aiEl=document.getElementById('ch-ai');aiEl.className='ai-box loading';aiEl.textContent='Analysiere...';
+  const analysis=await claude(`Analysiere diesen YouTube Kanal kurz:\nSubscriber: ${st.subscriberCount}\nViews: ${st.viewCount}\nVideos: ${st.videoCount}\nNische: ${S.niche}\n\nGib: 1) Bewertung (2 Sätze) 2) Größte Chance 3) Sofortige Maßnahme. Direkt, auf Deutsch.`,'YouTube Stratege. Kurz und direkt.');
+  aiEl.className='ai-box';aiEl.textContent=analysis;
+  addNotif('Kanal geladen',`Subs: ${fmtNum(st.subscriberCount)} | Views: ${fmtNum(st.viewCount)} | Score: ${score}/10`,'green');
+  setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// VIDEO ANALYSE MODI
+// ═══════════════════════════════════════
+function setVMode(m){
+  ['url','upload','manual'].forEach(x=>{
+    document.getElementById('vm-'+x).style.display=x===m?'block':'none';
+    const b=document.getElementById('vmode-'+x);
+    if(b){b.className='btn '+(x===m?'btn-red':'btn-outline');b.style.border=x===m?'none':'1px solid var(--border)';}
+  });
+  document.getElementById('v-result').style.display='none';
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-z').classList.remove('drag');
+  if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);
+}
+
+function handleFile(e){if(e.target.files[0])processFile(e.target.files[0]);}
+
+function processFile(f){
+  if(f.size>10*1024*1024){alert('Max 10MB');return;}
+  const r=new FileReader();
+  r.onload=e=>{
+    uploadData={data:e.target.result.split(',')[1],type:f.type};
+    document.getElementById('prev-img').src=e.target.result;
+    document.getElementById('upload-prev').style.display='block';
+    document.getElementById('file-nm').textContent=f.name;
+    document.getElementById('upload-btn').disabled=false;
+  };
+  r.readAsDataURL(f);
+}
+
+function clearFile(){uploadData=null;document.getElementById('upload-prev').style.display='none';document.getElementById('file-in').value='';document.getElementById('upload-btn').disabled=true;}
+
+async function analyzeURL(){
+  const url=document.getElementById('v-url').value.trim();
+  if(!url)return;
+  setStat('ANALYSIERT...');
+  const match=url.match(/[?&]v=([^&]+)/)||url.match(/youtu\.be\/([^?]+)/);
+  const vid=match?match[1]:url;
+  let info=`Video URL: ${url}`;
+  if(S.yt){
+    const d=await ytAPI('videos',{part:'snippet,statistics,contentDetails',id:vid});
+    if(d?.items?.[0]){
+      const v=d.items[0];
+      info=`Titel: ${v.snippet.title}\nTags: ${(v.snippet.tags||[]).slice(0,10).join(', ')}\nViews: ${v.statistics.viewCount}\nLikes: ${v.statistics.likeCount}\nKommentare: ${v.statistics.commentCount}\nDauer: ${v.contentDetails.duration}\nBeschreibung: ${v.snippet.description?.substring(0,200)}`;
+    }
+  }
+  await runVideoAnalysis(info,[],'URL');
+}
+
+async function analyzeUpload(){
+  if(!uploadData)return;
+  setStat('ANALYSIERT BILD...');
+  const ctx=document.getElementById('upload-ctx').value;
+  document.getElementById('v-visual').style.display='block';
+  document.getElementById('v-visual-text').className='ai-box loading';
+  document.getElementById('v-visual-text').textContent='Analysiere...';
+  await runVideoAnalysis(`Analysiere dieses YouTube Thumbnail/Screenshot. Kontext: ${ctx||S.niche}`,[uploadData],'UPLOAD');
+}
+
+async function analyzeManual(){
+  const title=document.getElementById('m-title').value;
+  if(!title){alert('Titel eingeben');return;}
+  setStat('ANALYSIERT...');
+  const info=`Titel: ${title}\nThumbnail: ${document.getElementById('m-thumb').value}\nHook (30 Sek.): ${document.getElementById('m-hook').value}\nDetails: ${document.getElementById('m-desc').value}\nNische: ${S.niche}`;
+  await runVideoAnalysis(info,[],'MANUAL');
+}
+
+async function runVideoAnalysis(info,images,mode){
+  document.getElementById('v-result').style.display='block';
+  const j=await claudeJSON(`Analysiere dieses YouTube Video für Algorithmus-Erfolg:\n${info}\n\nGib NUR JSON:\n{"visual_description":"Was ich sehe (nur bei Bild)","hook_score":7,"seo_score":6,"thumbnail_score":8,"retention_score":7,"overall_score":7,"strengths":["S1","S2","S3"],"weaknesses":["W1","W2","W3"],"next_steps":"3 konkrete Schritte."}`,
+    'YouTube Algorithmus Experte. NUR JSON. Auf Deutsch.',images);
+  if(!j){setStat('BEREIT');return;}
+  if(mode==='UPLOAD'&&j.visual_description){
+    document.getElementById('v-visual-text').className='ai-box';
+    document.getElementById('v-visual-text').textContent=j.visual_description;
+  }
+  document.getElementById('sc-hook').textContent=j.hook_score||'—';
+  document.getElementById('sc-seo').textContent=j.seo_score||'—';
+  document.getElementById('sc-thumb').textContent=j.thumbnail_score||'—';
+  document.getElementById('sc-total').textContent=j.overall_score||'—';
+  const bars=[{l:'Hook',s:j.hook_score,c:'var(--red)'},{l:'SEO',s:j.seo_score,c:'var(--blue)'},{l:'Thumbnail',s:j.thumbnail_score,c:'var(--yellow)'},{l:'Retention',s:j.retention_score,c:'var(--green)'},{l:'Gesamt',s:j.overall_score,c:'var(--purple)'}];
+  document.getElementById('sc-bars').innerHTML=bars.map(b=>`<div class="score-bar"><div class="score-label"><span>${b.l}</span><span style="color:${b.c}">${b.s}/10</span></div><div class="bar-track"><div class="bar-fill" style="width:${b.s*10}%;background:${b.c}"></div></div></div>`).join('');
+  document.getElementById('v-strengths').innerHTML=(j.strengths||[]).map(s=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:6px;font-size:12px"><span style="color:var(--green)">✓</span>${s}</div>`).join('');
+  document.getElementById('v-weaknesses').innerHTML=(j.weaknesses||[]).map(s=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:6px;font-size:12px"><span style="color:var(--red)">✗</span>${s}</div>`).join('');
+  document.getElementById('v-actions').textContent=j.next_steps||'';
+  addNotif('Video analysiert',`Score: ${j.overall_score}/10`,j.overall_score>=7?'green':'yellow');
+  setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// TRENDS
+// ═══════════════════════════════════════
+async function loadTrends(){
+  setStat('SUCHT...');
+  document.getElementById('trend-list').innerHTML='<div style="color:var(--muted);font-size:12px"><span class="spin"></span>Suche...</div>';
+  document.getElementById('trend-recs').className='ai-box loading';document.getElementById('trend-recs').textContent='...';
+  const j=await claudeJSON(`YouTube Trend-Experte. Mai 2026. Nische: "${S.niche}". ${getProfilContext()} Gib 5 aktuelle Trends. NUR JSON:\n{"trends":[{"rank":1,"title":"...","desc":"...","heat":"EXPLODIERT|STEIGT|STABIL","why":"..."}],"recommendation":"3-4 Sätze direkte Empfehlung."}`,'Antworte NUR JSON.');
+  if(!j){setStat('BEREIT');return;}
+  const hc={'EXPLODIERT':'b-red','STEIGT':'b-yellow','STABIL':'b-green'};
+  document.getElementById('trend-list').innerHTML=(j.trends||[]).map(t=>`
+    <div class="trend-row"><div class="trend-num ${t.heat==='EXPLODIERT'?'hot':''}">${String(t.rank).padStart(2,'0')}</div>
+    <div><h4 style="font-size:12px;margin-bottom:3px">${t.title} <span class="badge ${hc[t.heat]||'b-blue'}">${t.heat}</span></h4>
+    <p style="font-size:11px;color:var(--muted)">${t.desc}</p>
+    <p style="font-size:10px;color:var(--muted);margin-top:2px;font-style:italic">${t.why}</p></div></div>`).join('');
+  document.getElementById('trend-recs').className='ai-box';document.getElementById('trend-recs').textContent=j.recommendation||'';
+  addNotif('Trends geladen','5 aktuelle Trends analysiert','blue');setStat('AKTIV');
+}
+
+async function genIdeas(){
+  const el=document.getElementById('idea-result');el.style.display='block';el.className='ai-box loading';el.textContent='...';
+  const ctx=document.getElementById('idea-ctx').value;
+  const r=await claude(`Generiere 5 konkrete YouTube Video-Ideen für: ${S.niche}. ${ctx?'Kontext: '+ctx:''}\n\nJe Idee:\n📹 [TITEL]\n→ Hook-Idee\n→ Warum jetzt trending\n→ Schwierigkeit: Einfach/Mittel/Aufwendig\n\nDirekt, konkret, keine Generics.`,'YouTube Stratege.');
+  el.className='ai-box';el.textContent=r;
+}
+
+// ═══════════════════════════════════════
+// ALGO MONITOR
+// ═══════════════════════════════════════
+async function checkAlgo(){
+  setStat('PRÜFT...');
+  document.getElementById('algo-changes').innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Analysiere...</div>';
+  document.getElementById('algo-impact').className='ai-box loading';document.getElementById('algo-impact').textContent='...';
+  const j=await claudeJSON(`YouTube Algorithmus Experte. Stand Mai 2026. Liste wichtigste Algo-Änderungen der letzten Monate. NUR JSON:\n{"changes":[{"date":"Q1 2026","title":"...","desc":"...","severity":"HOCH|MITTEL|NIEDRIG"}],"impact":"Was bedeutet das für Nische: ${S.niche}? 3-5 Sätze."}`,'NUR JSON.');
+  if(!j){setStat('BEREIT');return;}
+  const sa={'HOCH':'alert-red','MITTEL':'alert-yellow','NIEDRIG':'alert-blue'};
+  document.getElementById('algo-changes').innerHTML=(j.changes||[]).map(c=>`
+    <div class="alert ${sa[c.severity]||'alert-blue'}" style="margin-bottom:6px">
+      <div><div style="display:flex;gap:6px;align-items:center;margin-bottom:3px"><span style="font-size:12px;font-weight:700">${c.title}</span><span class="badge ${c.severity==='HOCH'?'b-red':c.severity==='MITTEL'?'b-yellow':'b-blue'}">${c.severity}</span><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">${c.date}</span></div>
+      <span style="font-size:12px">${c.desc}</span></div></div>`).join('');
+  document.getElementById('algo-impact').className='ai-box';document.getElementById('algo-impact').textContent=j.impact||'';
+  addNotif('Algo-Check','Änderungen analysiert','red');setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// NISCHEN-CHECKER
+// ═══════════════════════════════════════
+const MARKET_META={
+  de:{label:'Deutsch',cpmMult:1.3,satMult:0.6,note:'Niedrige Konkurrenz, hohes CPM'},
+  en:{label:'Englisch',cpmMult:1.0,satMult:1.0,note:'Größte Reichweite, stärkste Konkurrenz'},
+  es:{label:'Spanisch',cpmMult:0.7,satMult:0.7,note:'500M Sprecher, AI-Content dünn'},
+  pt:{label:'Portugiesisch',cpmMult:0.8,satMult:0.5,note:'Brasilien = YouTube Nr.2 weltweit'},
+  fr:{label:'Französisch',cpmMult:1.1,satMult:0.65,note:'Hohe CPMs, wenig Tech-Creator'},
+  ar:{label:'Arabisch',cpmMult:0.6,satMult:0.4,note:'Kaum AI-Content — blauer Ozean'},
+  hi:{label:'Hindi',cpmMult:0.4,satMult:0.8,note:'500M User, CPM niedrig'},
+  tr:{label:'Türkisch',cpmMult:0.7,satMult:0.5,note:'Wachstumsmarkt'},
+};
+
+async function runNischen(){
+  const niche=document.getElementById('nc-niche').value.trim()||S.niche;
+  const mk=document.getElementById('nc-market').value;
+  const m=MARKET_META[mk]||MARKET_META.de;
+  setStat('ANALYSIERT...');
+  const el=document.getElementById('nc-result');
+  el.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Analysiere...</div>';
+
+  const j=await claudeJSON(`Analysiere YouTube-Nische: "${niche}" für Markt: ${m.label}. CPM-Multiplikator: ${m.cpmMult}x. NUR JSON:\n{"saturation":55,"base_cpm":18,"growth":"+280%","competition":"mittel","verdict":"warn|good|great","verdict_text":"3 Sätze ehrliche Einschätzung.","leaders":["Konkurrent1","Konkurrent2"],"gaps":["Lücke1","Lücke2","Lücke3"],"sub_niches":["Sub1","Sub2","Sub3","Sub4"],"names":["Name1","Name2","Name3","Name4","Name5","Name6","Name7","Name8","Name9","Name10"]}`,'Antworte NUR JSON. YouTube Markt Experte.');
+  if(!j){el.innerHTML='<p style="color:var(--muted)">Fehler — Claude API Key prüfen</p>';setStat('BEREIT');return;}
+
+  const adjSat=Math.min(99,Math.round(j.saturation*m.satMult));
+  const adjCpm=(j.base_cpm*m.cpmMult).toFixed(0);
+  const sc=adjSat>=70?'var(--red)':adjSat>=40?'var(--yellow)':'var(--green)';
+  const TAKEN=['AniDoc','The Silent Grind','DocuAI','AIDocs','NarrateAI'];
+
+  el.innerHTML=`
+    <div class="g4" style="margin-bottom:12px">
+      <div class="stat red"><div class="stat-label">Sättigung</div><div class="stat-val" style="color:${sc}">${adjSat}%</div><div class="stat-sub">${adjSat>=70?'Hoch':adjSat>=40?'Mittel':'Niedrig'}</div></div>
+      <div class="stat green"><div class="stat-label">Ø CPM</div><div class="stat-val" style="font-size:24px">€${adjCpm}</div><div class="stat-sub">/1000 Views</div></div>
+      <div class="stat blue"><div class="stat-label">Wachstum</div><div class="stat-val" style="font-size:22px">${j.growth||'—'}</div><div class="stat-sub">12 Monate</div></div>
+      <div class="stat yellow"><div class="stat-label">Konkurrenz</div><div class="stat-val" style="font-size:16px;margin-top:6px">${j.competition||'—'}</div></div>
+    </div>
+    <div class="alert ${adjSat>=70?'alert-red':adjSat>=40?'alert-yellow':'alert-green'}" style="margin-bottom:12px">
+      <span>${adjSat>=70?'⚠️':adjSat>=40?'💡':'✅'}</span><span>${j.verdict_text||m.note}</span>
+    </div>
+    <div class="g2" style="margin-bottom:12px">
+      <div class="info-card"><h3>🏆 Konkurrenten + Lücken</h3>
+        ${(j.leaders||[]).map(l=>`<div style="padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--red)">✗</span>${l}</div>`).join('')}
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+          ${(j.gaps||[]).map(g=>`<div style="padding:4px 0;font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">✓</span>${g}</div>`).join('')}
+        </div>
+      </div>
+      <div class="info-card"><h3>🔬 Sub-Nischen (weniger Konkurrenz)</h3>
+        ${(j.sub_niches||[]).map((s,i)=>`<div class="trend-row" style="padding:6px 0"><div class="trend-num ${i===0?'hot':''}" style="font-size:20px">${String(i+1).padStart(2,'0')}</div><div><h4 style="font-size:11px">${s}</h4></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="info-card"><h3>🏷️ 10 Kanal-Namen für ${m.label}</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:10px">
+        ${(j.names||[]).map(n=>{const t=TAKEN.some(x=>x.toLowerCase()===n.toLowerCase());return`<div style="background:var(--surface);border:1px solid ${t?'var(--red)':'var(--border)'};border-radius:4px;padding:10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700">${n}</span><span class="badge ${t?'b-red':'b-green'}">${t?'BELEGT':'FREI*'}</span></div>`;}).join('')}
+      </div>
+      <p style="font-size:10px;color:var(--muted);margin-top:8px">* Vor Launch auf YouTube + Social Media selbst prüfen.</p>
+    </div>`;
+  addNotif('Nischen-Check',`${niche} (${m.label}) — Sättigung: ${adjSat}%, CPM: €${adjCpm}`,adjSat>=70?'red':adjSat>=40?'yellow':'green');
+  setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// NATIONS-ANALYSE
+// ═══════════════════════════════════════
+const NATIONS={
+  de:{flag:'🇩🇪',name:'Deutschland',cpm:'€25–55',mon:'✅ Voll monetarisierbar',chance:'HOCH',chC:'var(--green)',insight:'Stärkstes CPM/Konkurrenz-Verhältnis. Weniger als 20 dominante Kanäle in AI-Doku auf Deutsch.',style:'Semi-realistisch, sauber, 2 Wörter auf Thumbnail. Sachlichkeit und Klarheit.',prompt:'Semi-realistic 2D illustrated character, clean white background, cinematic lighting, European features, professional attire, bold 2-word German text overlay, YouTube thumbnail 16:9',dont:'Kein Clickbait-Gesicht, keine überladenen Thumbnails'},
+  et:{flag:'🇪🇹',name:'Äthiopien',cpm:'€0.5–2',mon:'⚠️ YT-Monetarisierung eingeschränkt — Sponsoring-Fokus',chance:'BLAUER OZEAN',chC:'var(--blue)',insight:'Schnellst wachsender digitaler Markt Afrikas. Kaum AI-Content auf Amharisch. Riesige Pionier-Chance.',style:'Warme Farben, lokale Charaktere, expressive Gesichter. Flache 2D Animation.',prompt:'Vibrant 2D cartoon, Ethiopian features, warm golden-brown tones, colorful clothing, expressive eyes, bright warm background, flat animation, educational YouTube thumbnail 16:9',dont:'Keine westlichen Charaktere — authentische Repräsentation'},
+  jp:{flag:'🇯🇵',name:'Japan',cpm:'€15–35',mon:'✅ Voll monetarisierbar',chance:'MITTEL',chC:'var(--yellow)',insight:'Anime-Ästhetik dominiert. Sehr loyale Zuschauerschaft. Ohne Japanisch schwer.',style:'Anime-Stil ist Pflicht. Große Augen, dynamische Posen, lebhafte Farben.',prompt:'Anime style illustration, large expressive eyes, clean line art, vibrant colors, dynamic pose, Japanese animation, YouTube thumbnail 16:9',dont:'Kein westlicher Cartoon-Stil'},
+  us:{flag:'🇺🇸',name:'USA',cpm:'€18–50',mon:'✅ Voll monetarisierbar',chance:'HART',chC:'var(--red)',insight:'Größter Markt, härteste Konkurrenz. European-Perspective als Unique Angle nutzen.',style:'Hochkontrast, dramatische Beleuchtung, echte Emotionen. Energie und Dringlichkeit.',prompt:'High contrast YouTube thumbnail, dramatic lighting, expressive shocked face, bold typography, dark background bright accents, 16:9',dont:'Kein ruhiger sachlicher Stil — US braucht Energie'},
+  br:{flag:'🇧🇷',name:'Brasilien',cpm:'€4–12',mon:'✅ Voll monetarisierbar',chance:'HOCH',chC:'var(--green)',insight:'3.-größter YouTube-Markt. Wenig AI-Doku auf Portugiesisch. Sehr hohe Engagement-Rate.',style:'Lebhafte warme Farben. Grün + Gelb. Freundliche Charaktere. Flache Animation.',prompt:'Vibrant flat 2D animation, Brazilian features, warm colors greens yellows, friendly expressive character, educational, bold Portuguese text, YouTube thumbnail 16:9',dont:'Kein steifer europäischer Stil'},
+  in:{flag:'🇮🇳',name:'Indien',cpm:'€1–5',mon:'✅ Voll monetarisierbar',chance:'VOLUMEN',chC:'var(--yellow)',insight:'Größter YouTube-Markt weltweit. AniDoc-Format auf Hindi explodiert gerade.',style:'Sehr bunte Thumbnails. Expressive Gesichter Pflicht. Rote Kreise/Pfeile.',prompt:'Colorful high-contrast YouTube thumbnail, Indian features, expressive shocked face, bright red orange yellow, bold Hindi English text, arrow element, 16:9',dont:'Kein minimalistischer Stil'},
+  sa:{flag:'🇸🇦',name:'Saudi-Arabien',cpm:'€8–20',mon:'✅ Voll monetarisierbar',chance:'OFFEN',chC:'var(--green)',insight:'95.8% YouTube-Nutzungsrate. AI-Content auf Arabisch extrem dünn. Bildung sehr gefragt.',style:'Professionell, dunkelblau + gold. Arabische Kalligraphie als Element.',prompt:'Professional 2D documentary, deep blue gold palette, Arabic calligraphy elements, clean minimalist, educational, Arabic bold text, YouTube thumbnail 16:9',dont:'Keine religiös sensiblen Darstellungen'},
+  ng:{flag:'🇳🇬',name:'Nigeria',cpm:'€1–4',mon:'✅ Monetarisierung möglich',chance:'WACHSTUM',chC:'var(--yellow)',insight:'Kreativstes Land Afrikas. Englischsprachig — globale Reichweite. CPM wächst.',style:'Energie, Farbe, Ausdruck. Afrikanische Textilmuster. Warme Erdtöne.',prompt:'Vibrant 2D animation, African features, colorful fabric patterns subtle, warm earthy tones bright accents, energetic, friendly YouTube thumbnail 16:9',dont:'Kein Klischee-Afrika — moderne urbane Darstellung'},
+  fr:{flag:'🇫🇷',name:'Frankreich',cpm:'€12–28',mon:'✅ Voll monetarisierbar',chance:'HOCH',chC:'var(--green)',insight:'Hohe CPMs, wenig Tech-Creator auf Französisch. Bildungshungriges Publikum.',style:'Elegant minimalistisch. Blau-Weiß-Rot subtil. Semi-realistisch.',prompt:'Elegant minimalist 2D, French aesthetic, blue white red subtle, professional character, clean background, documentary style, bold French text, YouTube thumbnail 16:9',dont:'Kein US-Clickbait-Stil'},
+  tr:{flag:'🇹🇷',name:'Türkei',cpm:'€5–15',mon:'✅ Voll monetarisierbar',chance:'WACHSTUM',chC:'var(--green)',insight:'Wächst stark. Wenig AI-Doku auf Türkisch. Junge Tech-affine Bevölkerung.',style:'Dynamisch, modern. Türkis + Rot. Semi-realistisch.',prompt:'Modern semi-realistic 2D, Turkish features, teal red accent, clean professional, documentary educational, bold Turkish text, YouTube thumbnail 16:9',dont:'Keine politisch sensiblen Themen'},
+  mx:{flag:'🇲🇽',name:'Mexiko',cpm:'€3–10',mon:'✅ Voll monetarisierbar',chance:'WACHSTUM',chC:'var(--green)',insight:'Tor zum LATAM-Markt. Was für Mexiko funktioniert, funktioniert für 500M+ Sprecher.',style:'Warm, lebendig. LATAM-Features. Groß und klarer Text.',prompt:'Vibrant colorful 2D animation, Latin American features, warm colors, friendly expressive, educational documentary, bold Spanish text, YouTube thumbnail 16:9',dont:'Kein kulturelles Klischee — moderne Darstellung'},
+  cn:{flag:'🇨🇳',name:'China',cpm:'N/A auf YT',mon:'⛔ YouTube gesperrt — Bilibili nutzen',chance:'ANDERE PLATTFORM',chC:'var(--red)',insight:'YouTube geblockt. Für Auslands-Chinesen (50M+) funktioniert YT. Für China-Inland: Bilibili.',style:'Minimalistisch professionell für Diaspora. Rote Akzente (Glück). Keine politisch sensiblen Symbole.',prompt:'Clean professional 2D, minimalist, red gold accents Chinese-inspired subtle, modern tech, documentary, YouTube thumbnail 16:9 overseas Chinese audience',dont:'Keine politisch sensiblen Themen'},
+};
+
+function showNation(){
+  const n=NATIONS[document.getElementById('nat-sel').value];
+  if(!n)return;
+  document.getElementById('nat-detail').innerHTML=`
+    <div class="g2" style="margin-top:14px">
+      <div class="info-card">
+        <h3>${n.flag} ${n.name} — Analyse</h3>
+        <div class="g2" style="margin:10px 0;gap:8px">
+          <div style="background:var(--surface);border-radius:4px;padding:10px;text-align:center"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px">CPM</div><div style="font-size:18px;font-weight:700;color:var(--green)">${n.cpm}</div></div>
+          <div style="background:var(--surface);border-radius:4px;padding:10px;text-align:center"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:3px">CHANCE</div><div style="font-size:14px;font-weight:700;color:${n.chC}">${n.chance}</div></div>
+        </div>
+        <div class="alert ${n.mon.includes('✅')?'alert-green':n.mon.includes('⚠️')?'alert-yellow':'alert-red'}" style="margin-bottom:10px"><span>${n.mon}</span></div>
+        <p style="font-size:12px;color:#aaa;line-height:1.6;margin-bottom:10px">${n.insight}</p>
+        <div class="alert alert-yellow"><span>✗</span><span style="font-size:12px">${n.dont}</span></div>
+      </div>
+      <div class="info-card">
+        <h3>🎨 Bildstil & AI-Prompt</h3>
+        <div class="alert alert-blue" style="margin-bottom:10px"><span>🎭</span><span style="font-size:12px">${n.style}</span></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px">AI BILD-PROMPT (DALL-E / FLUX)</div>
+        <div style="background:#0D0D0D;border:1px solid var(--border);border-left:3px solid var(--blue);padding:10px;font-family:var(--mono);font-size:11px;color:#aaa;line-height:1.6;border-radius:0 4px 4px 0;cursor:pointer" onclick="navigator.clipboard.writeText(this.textContent.trim());this.style.borderLeftColor='var(--green)';setTimeout(()=>this.style.borderLeftColor='var(--blue)',1500)">${n.prompt}</div>
+        <p style="font-size:10px;color:var(--muted);margin-top:6px">Klicken zum Kopieren</p>
+      </div>
+    </div>`;
+  addNotif(`${n.flag} ${n.name}`,`CPM: ${n.cpm} | ${n.chance}`,'blue');
+}
+
+// ═══════════════════════════════════════
+// REVENUE CALCULATOR
+// ═══════════════════════════════════════
+const CPM_DATA={
+  de:{base:35,min:25,max:55},en:{base:28,min:18,max:50},et:{base:1,min:0.5,max:2},
+  br:{base:7,min:4,max:12},in:{base:2.5,min:1,max:5},sa:{base:12,min:8,max:20}
+};
+const NICHE_CPM={ai_doku:1.4,finance:1.6,coding:1.3,motivation:0.7,gaming:0.8,health:1.2,travel:1.0,food:0.9,education:1.1,entertainment:0.8};
+const LEN_MULT={short:0.35,mid:1.0,long:1.4};
+
+function calcRevenue(){
+  const niche=document.getElementById('rev-niche').value;
+  const market=document.getElementById('rev-market').value;
+  const views=parseInt(document.getElementById('rev-views').value);
+  const len=document.getElementById('rev-len').value;
+  const subs=parseInt(document.getElementById('rev-subs').value);
+
+  const cpmData=CPM_DATA[market]||CPM_DATA.en;
+  const nicheMult=NICHE_CPM[niche]||1.0;
+  const lenMult=LEN_MULT[len];
+
+  const cpm=cpmData.base*nicheMult*lenMult;
+  const rpm=cpm*0.45;
+  const adsense=(views/1000)*rpm;
+
+  // Sponsoring
+  let sponsoring=0;
+  if(subs>=100000)sponsoring=views*0.003;
+  else if(subs>=50000)sponsoring=views*0.001;
+  else if(subs>=10000)sponsoring=views*0.0004;
+  else if(subs>=5000)sponsoring=views*0.0001;
+
+  // Digital Product potential
+  const convRate=0.005;
+  const avgPrice=29;
+  const digitalPotential=views*convRate*avgPrice;
+
+  const total=adsense+sponsoring;
+  const maxPotential=adsense+sponsoring+digitalPotential;
+
+  const fmt=(n)=>n<10?n.toFixed(2):n<1000?Math.round(n).toString():fmtNum(n);
+
+  document.getElementById('rev-result').innerHTML=`
+    <div class="info-card" style="margin-bottom:12px">
+      <h3>💰 Einnahmen-Schätzung für ${fmtNum(views)} Views/Monat</h3>
+      <div class="g3" style="margin:12px 0">
+        <div class="stat green"><div class="stat-label">AdSense (RPM)</div><div class="stat-val" style="font-size:22px">€${fmt(adsense)}</div><div class="stat-sub">RPM: €${rpm.toFixed(2)}/1000</div></div>
+        <div class="stat blue"><div class="stat-label">Sponsoring</div><div class="stat-val" style="font-size:22px">€${fmt(sponsoring)}</div><div class="stat-sub">${subs>=5000?'Realistisch ab '+fmtNum(subs)+' Subs':'Noch nicht realistisch'}</div></div>
+        <div class="stat yellow"><div class="stat-label">Gesamt/Monat</div><div class="stat-val" style="font-size:22px">€${fmt(total)}</div><div class="stat-sub">CPM: €${cpm.toFixed(2)}</div></div>
+      </div>
+      <div class="alert alert-blue" style="margin-bottom:8px">
+        <span>💡</span><span style="font-size:12px">Digitales Produkt (Kurs/Template) Potential: <strong style="color:white">+€${fmt(digitalPotential)}/Monat</strong> — unabhängig von Ads. Gesamt-Max: €${fmt(maxPotential)}</span>
+      </div>
+      <div style="margin-top:10px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:6px">SKALIERUNG — WAS WENN...</div>
+        ${[[views*5,'5x Views'],[views*10,'10x Views'],[views*50,'50x Views']].map(([v,l])=>{
+          const a=(v/1000)*rpm;
+          const s=subs>=5000?v*0.001:0;
+          return`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--muted)">${l} = ${fmtNum(v)} Views</span><span style="color:var(--green);font-weight:700">€${fmt(a+s)}/Mo</span></div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  // KI-Strategie
+  if(S.claude){
+    document.getElementById('rev-ai').style.display='block';
+    const aiEl=document.getElementById('rev-ai-text');aiEl.className='ai-box loading';aiEl.textContent='...';
+    claude(`Creator hat ${fmtNum(views)} Views/Monat, ${fmtNum(subs)} Subs, Nische: ${niche}, Markt: ${market}.\nAktuell AdSense: €${fmt(adsense)}/Mo, Sponsoring: €${fmt(sponsoring)}/Mo.\n\nGib konkrete Strategie um Einnahmen zu verdoppeln. 3 spezifische Schritte. Direkt, auf Deutsch.`,'YouTube Monetarisierungs-Experte.').then(r=>{aiEl.className='ai-box';aiEl.textContent=r;});
+  }
+  addNotif('Revenue berechnet',`${fmtNum(views)} Views → €${fmt(total)}/Monat`,total>100?'green':'yellow');
+}
+
+// ═══════════════════════════════════════
+// A/B THUMBNAIL TEST
+// ═══════════════════════════════════════
+function loadAB(side,e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    abData[side]={data:ev.target.result.split(',')[1],type:f.type};
+    const slot=document.getElementById('ab-'+side+'-slot');
+    slot.innerHTML=`<img src="${ev.target.result}" style="max-width:100%;border-radius:4px;max-height:140px;object-fit:cover">`;
+    if(abData.a&&abData.b)document.getElementById('ab-btn').disabled=false;
+  };
+  r.readAsDataURL(f);
+}
+
+async function runABTest(){
+  if(!abData.a||!abData.b){alert('Beide Thumbnails hochladen');return;}
+  setStat('VERGLEICHT...');
+  document.getElementById('ab-result').style.display='block';
+  document.getElementById('ab-winner-text').className='ai-box loading';document.getElementById('ab-winner-text').textContent='...';
+
+  const ctx=document.getElementById('ab-ctx').value||S.niche;
+  const j=await claudeJSON(
+    `Vergleiche diese 2 YouTube Thumbnails für Nische: ${ctx}. Gib NUR JSON:\n{"winner":"A|B","winner_score":8,"loser_score":6,"winner_reason":"Warum gewinnt dieses thumbnail (3 Sätze)","a_analysis":"Detaillierte Analyse Thumbnail A","b_analysis":"Detaillierte Analyse Thumbnail B","tip":"Konkrete Verbesserung für das schwächere Thumbnail"}`,
+    'YouTube CTR Experte. NUR JSON.',
+    [abData.a,abData.b]
+  );
+
+  if(!j){document.getElementById('ab-winner-text').className='ai-box';document.getElementById('ab-winner-text').textContent='Fehler — Claude API Key prüfen';setStat('BEREIT');return;}
+
+  const w=j.winner||'A';const l=w==='A'?'B':'A';
+  document.getElementById('ab-'+w.toLowerCase()+'-slot').classList.add('ab-winner');
+  document.getElementById('ab-'+l.toLowerCase()+'-slot').classList.add('ab-loser');
+  document.getElementById('ab-'+w.toLowerCase()+'-score').style.display='block';
+  document.getElementById('ab-'+l.toLowerCase()+'-score').style.display='block';
+  document.getElementById('ab-'+w.toLowerCase()+'-val').textContent=j.winner_score||'—';
+  document.getElementById('ab-'+l.toLowerCase()+'-val').textContent=j.loser_score||'—';
+  document.getElementById('ab-winner-title').textContent=`🏆 Gewinner: Thumbnail ${w}`;
+  document.getElementById('ab-winner-text').className='ai-box';document.getElementById('ab-winner-text').textContent=j.winner_reason+(j.tip?'\n\n💡 Tipp: '+j.tip:'');
+  document.getElementById('ab-a-analysis').textContent=j.a_analysis||'';
+  document.getElementById('ab-b-analysis').textContent=j.b_analysis||'';
+  addNotif('A/B Test',`Gewinner: Thumbnail ${w} (${j.winner_score}/10 vs ${j.loser_score}/10)`,w==='A'?'green':'blue');
+  setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// CONTENT KALENDER
+// ═══════════════════════════════════════
+async function genKalender(){
+  setStat('GENERIERT...');
+  const freq=parseInt(document.getElementById('kal-freq').value);
+  const shorts=document.getElementById('kal-shorts').value;
+  const focus=document.getElementById('kal-focus').value;
+  const el=document.getElementById('kal-result');
+  el.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Generiere 30-Tage-Plan...</div>';
+
+  const j=await claudeJSON(`Erstelle einen 30-Tage YouTube Content-Kalender.\nNische: ${S.niche}\nUploads: ${freq}x/Woche\nShorts: ${shorts}\nFokus: ${focus||'Standard-Nische'}\n\nGib NUR JSON:\n{"weeks":[{"week":1,"posts":[{"day":"Montag","type":"main|short","title":"Konkreter Titel","hook":"Erster Satz","time":"18:00"}]}],"strategy":"Übergeordnete Strategie 2-3 Sätze"}`,'Content Stratege. NUR JSON.');
+
+  if(!j){el.innerHTML='<p style="color:var(--muted)">Fehler</p>';setStat('BEREIT');return;}
+
+  const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  let html=`<div class="info-card" style="margin-top:14px"><h3>📅 30-Tage-Plan — ${S.niche}</h3>`;
+  if(j.strategy)html+=`<div class="alert alert-blue" style="margin:10px 0"><span>🎯</span><span style="font-size:12px">${j.strategy}</span></div>`;
+
+  (j.weeks||[]).forEach(wk=>{
+    html+=`<div style="margin-bottom:16px"><div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:8px">WOCHE ${wk.week}</div><div class="cal-grid">`;
+    days.forEach(d=>{
+      const posts=(wk.posts||[]).filter(p=>p.day&&p.day.substring(0,2)===d||p.day===d);
+      html+=`<div class="cal-day ${posts.some(p=>p.type==='main')?'has-post':posts.some(p=>p.type==='short')?'has-short':''}">
+        <div class="cal-day-label">${d}</div>
+        ${posts.map(p=>`<div class="cal-post ${p.type==='main'?'main':'short'}">${p.type==='main'?'📹':'📱'} ${(p.title||'').substring(0,20)}${(p.title||'').length>20?'...':''}</div>`).join('')}
+      </div>`;
+    });
+    html+='</div>';
+    // Liste
+    if(wk.posts?.length){
+      html+=`<div style="margin-top:8px">`;
+      wk.posts.forEach(p=>{
+        html+=`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:8px;align-items:flex-start">
+          <span class="badge ${p.type==='main'?'b-red':'b-blue'}">${p.type==='main'?'MAIN':'SHORT'}</span>
+          <div><strong>${p.title||'—'}</strong>${p.hook?('<br><span style="color:var(--muted);font-size:11px">'+p.hook+'</span>'):''}</div>
+          <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted)">${p.time||''}</span>
+        </div>`;
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+  addNotif('Kalender generiert','30-Tage-Plan erstellt','green');setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// VIRAL FORMEL
+// ═══════════════════════════════════════
+async function checkViral(){
+  const input=document.getElementById('viral-input').value.trim();
+  if(!input){alert('Video-Idee eingeben');return;}
+  setStat('BERECHNET...');
+  document.getElementById('viral-result').style.display='block';
+  document.getElementById('v-title').className='ai-box loading';document.getElementById('v-title').textContent='...';
+  document.getElementById('v-hook').className='ai-box loading';document.getElementById('v-hook').textContent='...';
+
+  const niche=document.getElementById('viral-niche').value||S.niche;
+  const market=document.getElementById('viral-market').value;
+
+  const j=await claudeJSON(`Analysiere das Viral-Potential dieser YouTube Video-Idee:\n"${input}"\nNische: ${niche}, Markt: ${market}${getProfilContext()}\n\nNUR JSON:\n{"total":7,"emotion":8,"timing":6,"hook":7,"shareability":7,"boosters":["Faktor1","Faktor2","Faktor3"],"fixes":["Fix1","Fix2","Fix3"],"optimized_title":"Verbesserter Titel der viral geht","better_hook":"Verbesserter Hook erste 15 Sekunden"}`,'Viral-Content Experte. NUR JSON.');
+
+  if(!j){setStat('BEREIT');return;}
+  document.getElementById('vsc-total').textContent=j.total||'—';
+  document.getElementById('vsc-emo').textContent=j.emotion||'—';
+  document.getElementById('vsc-time').textContent=j.timing||'—';
+  document.getElementById('vsc-hook').textContent=j.hook||'—';
+  document.getElementById('v-boosters').innerHTML=(j.boosters||[]).map(b=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--green)">🚀</span>${b}</div>`).join('');
+  document.getElementById('v-fixes').innerHTML=(j.fixes||[]).map(f=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;gap:6px"><span style="color:var(--yellow)">🔧</span>${f}</div>`).join('');
+  document.getElementById('v-title').className='ai-box';document.getElementById('v-title').textContent=j.optimized_title||'';
+  document.getElementById('v-hook').className='ai-box';document.getElementById('v-hook').textContent=j.better_hook||'';
+  addNotif('Viral-Score',`"${input.substring(0,40)}..." — Score: ${j.total}/10`,j.total>=7?'green':'yellow');
+  setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// MASTERPROMPT
+// ═══════════════════════════════════════
+const LANG_META={
+  de:{n:'🇩🇪 Deutsch',i:'Antworte auf Deutsch. Kulturell angepasst für DACH-YouTube. Sachlich, klar.'},
+  en:{n:'🇺🇸 Englisch',i:'Respond in English. Global YouTube audience. High energy, direct.'},
+  zh:{n:'🇨🇳 中文',i:'用中文回答。针对海外华人YouTube。专业、教育性强。'},
+  ja:{n:'🇯🇵 日本語',i:'日本語で回答。日本のYouTube視聴者向け。丁寧で詳細に。'},
+  es:{n:'🇪🇸 Español',i:'En español. Audiencia latinoamericana. Energético, educativo.'},
+  am:{n:'🇪🇹 አማርኛ',i:'በአማርኛ። ለኢትዮጵያ YouTube ተመልካቾች። ግልጽና ትምህርታዊ።'},
+  pt:{n:'🇧🇷 Português',i:'Em português brasileiro. Animado, próximo, educativo.'},
+  ar:{n:'🇸🇦 العربية',i:'باللغة العربية. لجمهور يوتيوب العربي. احترافي وتعليمي.'},
+};
+const TYPE_MAP={
+  script:'Schreibe vollständiges 8-10 Min YouTube Script: Hook (0-15s), Problem, 3 Schritte, Demo, CTA. Szenen mit [SZENE X] markieren.',
+  thumbnail:'DALL-E 3/Flux Prompt für YouTube Thumbnail (16:9). Kulturell angepasst.',
+  seo:'5 Titel-Varianten + 200-Wort Description + 20 Tags + 3 Kapitel-Timestamps.',
+  hook:'5 verschiedene Hooks (je 2-3 Sätze) für erste 15 Sekunden. Kulturell angepasst.',
+  short:'YouTube Shorts Script (60 Sek., 150 Wörter). Hook Sek.1, 3 Kernpunkte, Payoff.',
+  image:'3 AI-Bild-Prompts für Kanal-Charakter/Avatar. Stil, Kleidung, Farben, kulturelle Details.',
+};
+
+async function genMasterprompt(){
+  const input=document.getElementById('mp-input').value.trim();
+  if(!input){alert('Thema eingeben');return;}
+  const type=document.getElementById('mp-type').value;
+  const langs=[...document.querySelectorAll('#panel-masterprompt input[type=checkbox]:checked')].map(c=>c.value);
+  if(!langs.length){alert('Sprache wählen');return;}
+  const btn=document.getElementById('mp-btn');btn.disabled=true;btn.textContent='⏳...';
+  document.getElementById('mp-results').innerHTML='';
+
+  for(const lang of langs){
+    const m=LANG_META[lang];if(!m)continue;
+    const div=document.createElement('div');
+    div.className='info-card';div.style.marginBottom='12px';
+    div.innerHTML=`<h3>${m.n}</h3><div class="ai-box loading" id="mpr-${lang}" style="margin-top:8px">Generiert...</div>`;
+    document.getElementById('mp-results').appendChild(div);
+    const r=await claude(`${m.i}\n\nAufgabe: ${TYPE_MAP[type]||type}\n\nThema: ${input}\n\nWichtig: Kulturell adaptieren, nicht nur übersetzen.`,`YouTube Experte für ${m.n}.`);
+    const el=document.getElementById('mpr-'+lang);
+    if(el){el.className='ai-box';el.textContent=r;el.style.cursor='pointer';el.title='Klicken zum Kopieren';el.onclick=()=>{navigator.clipboard.writeText(r).catch(()=>{});el.style.borderLeftColor='var(--green)';setTimeout(()=>el.style.borderLeftColor='var(--red)',1500);};}
+  }
+  btn.disabled=false;btn.textContent='⚡ Generieren';
+  addNotif('Masterprompts',`${langs.length} Sprachen generiert`,'green');
+}
+
+// ═══════════════════════════════════════
+// RECHTS-CHECKER
+// ═══════════════════════════════════════
+async function runRecht(){
+  const input=document.getElementById('rc-input').value.trim();if(!input)return;
+  setStat('PRÜFT...');
+  const el=document.getElementById('rc-result');
+  el.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Prüfe...</div>';
+  const j=await claudeJSON(`YouTube Rechtsexperte. Analysiere: "${input}"\n\nNUR JSON:\n{"overall":"HOCH|MITTEL|NIEDRIG","copyright":{"risk":"HOCH|MITTEL|NIEDRIG|SICHER","issue":"...","solution":"..."},"persoenlichkeitsrecht":{"risk":"HOCH|MITTEL|NIEDRIG|SICHER","issue":"...","solution":"..."},"plattformregeln":{"risk":"HOCH|MITTEL|NIEDRIG|SICHER","issue":"...","solution":"..."},"musik":{"risk":"HOCH|MITTEL|NIEDRIG|SICHER","issue":"...","solution":"..."},"empfehlung":"3-4 Sätze konkrete Handlung."}`,'Rechtsexperte. NUR JSON. YouTube-Richtlinien 2026, deutsches Recht.');
+  if(!j){el.innerHTML='<p style="color:var(--muted)">Fehler</p>';setStat('BEREIT');return;}
+  const rc={'HOCH':'alert-red','MITTEL':'alert-yellow','NIEDRIG':'alert-green','SICHER':'alert-green'};
+  const rb={'HOCH':'b-red','MITTEL':'b-yellow','NIEDRIG':'b-green','SICHER':'b-green'};
+  const secs=[{k:'copyright',i:'📋',l:'Copyright'},{k:'persoenlichkeitsrecht',i:'👤',l:'Persönlichkeitsrecht'},{k:'plattformregeln',i:'📺',l:'Plattformregeln'},{k:'musik',i:'🎵',l:'Musik'}];
+  el.innerHTML=`<div class="info-card" style="margin-top:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3>⚖️ Rechts-Analyse</h3><span class="badge ${rb[j.overall]||'b-yellow'}" style="font-size:11px">GESAMT: ${j.overall}</span></div>
+    <div class="g2" style="margin-bottom:12px">
+      ${secs.map(s=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;font-weight:700">${s.i} ${s.l}</span><span class="badge ${rb[j[s.k]?.risk]||'b-yellow'}">${j[s.k]?.risk||'?'}</span></div>
+        <div class="alert ${rc[j[s.k]?.risk]||'alert-yellow'}" style="margin-bottom:6px;padding:6px 10px"><span style="font-size:11px">${j[s.k]?.issue||'OK'}</span></div>
+        <div style="font-size:11px;color:var(--green)">→ ${j[s.k]?.solution||''}</div>
+      </div>`).join('')}
+    </div>
+    <div class="alert ${rc[j.overall]||'alert-yellow'}"><span>💡</span><span style="font-size:12px;line-height:1.6">${j.empfehlung}</span></div>
+  </div>`;
+  addNotif('Rechts-Check',`Gesamt: ${j.overall}`,j.overall==='HOCH'?'red':j.overall==='MITTEL'?'yellow':'green');
+  setStat('AKTIV');
+}
+
+async function genMusic(){
+  const ref=document.getElementById('mus-ref').value.trim()||'West Coast Hip-Hop';
+  const use=document.getElementById('mus-use').value;
+  const el=document.getElementById('mus-result');
+  el.style.display='block';el.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Generiere...</div>';
+  const j=await claudeJSON('Musik-Prompt Experte für Suno AI / Udio.\nStil: "'+ref+'", Zweck: '+use+'\n\nNUR JSON:\n{"legal_note":"Warum rechtlich sicher","prompts":[{"name":"Version 1: Name","tags":"genre tags","prompt":"Vollständiger Suno/Udio Prompt","vibe":"Wofür geeignet"},{"name":"Version 2...","tags":"...","prompt":"...","vibe":"..."},{"name":"Version 3...","tags":"...","prompt":"...","vibe":"..."}],"capcut_tip":"CapCut Tipp"}','Musik Experte. NUR JSON. Kein Copyright auf Künstler.');
+  if(!j){el.innerHTML='<p style="color:var(--muted)">Fehler</p>';return;}
+  
+  let promptsHTML = (j.prompts||[]).map(function(p){
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:12px;font-weight:700">'+p.name+'</span><span class="badge b-blue">'+p.vibe+'</span></div>'
+      +'<div style="font-family:var(--mono);font-size:10px;color:var(--yellow);margin-bottom:6px">'+p.tags+'</div>'
+      +'<div style="background:#0D0D0D;border:1px solid var(--border);border-left:3px solid var(--green);padding:10px;font-family:var(--mono);font-size:11px;color:#aaa;line-height:1.6;border-radius:0 4px 4px 0;cursor:pointer" onclick="navigator.clipboard.writeText(this.textContent.trim())">'+p.prompt+'</div>'
+      +'</div>';
+  }).join('');
+  
+  let capcutHTML = j.capcut_tip ? '<div class="alert alert-yellow"><span>🎬</span><span style="font-size:12px">'+j.capcut_tip+'</span></div>' : '';
+  
+  el.innerHTML = '<div class="info-card">'
+    +'<h3>🎵 Lizenzfreie Prompts für "'+ref+'"</h3>'
+    +'<div class="alert alert-green" style="margin:10px 0"><span>✅</span><span style="font-size:12px">'+j.legal_note+'</span></div>'
+    +promptsHTML
+    +capcutHTML
+    +'<div style="display:flex;gap:8px;margin-top:10px">'
+    +'<a href="https://suno.com" target="_blank" style="background:var(--green);color:#000;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;text-decoration:none">→ Suno AI</a>'
+    +'<a href="https://udio.com" target="_blank" style="background:var(--blue);color:#000;padding:7px 14px;border-radius:4px;font-size:12px;font-weight:700;text-decoration:none">→ Udio</a>'
+    +'</div></div>';
+  addNotif('Musik-Prompts','3 lizenzfreie Varianten erstellt','green');
+}
+</script>
+</body>
+</html>
