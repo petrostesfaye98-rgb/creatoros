@@ -2783,8 +2783,24 @@ async function runAntiAIFilter(){
 function applyFixedScript(){
   var fixed=document.getElementById('ai-fixed-script')?.textContent;
   if(!fixed) return;
+  // Update script
   document.getElementById('yt-script').textContent=fixed;
-  addNotif('Script übernommen','Gefixter Script ist jetzt aktiv','green');
+  // Also regenerate voiceover from fixed script
+  var voiceEl=document.getElementById('yt-voice');
+  if(voiceEl){
+    voiceEl.className='ai-box loading';
+    voiceEl.textContent='Voiceover wird angepasst...';
+    var voiceTags='Use ONLY English emotion tags: [thoughtful], [serious], [motivated], [energetic], [calm]. CAPS for emphasis. ... for pauses. No German words.';
+    claude(
+      'Convert this script for ElevenLabs voiceover:\n\n'+fixed+'\n\n'+voiceTags+'\nNo timestamps — spoken text only. Flowing.',
+      'ElevenLabs Expert. English emotion tags only.'
+    ).then(function(voice){
+      voiceEl.className='ai-box';
+      voiceEl.style.whiteSpace='pre-wrap';
+      voiceEl.textContent=voice;
+      addNotif('Script + Voiceover übernommen','Beide wurden aktualisiert','green');
+    });
+  }
   document.getElementById('yt-script').scrollIntoView({behavior:'smooth'});
 }
 
