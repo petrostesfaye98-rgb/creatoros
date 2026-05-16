@@ -2494,11 +2494,11 @@ async function runPlatformEngine(){
     if(S.el) document.getElementById('el-direct').style.display='block';
     const seo=await claudeJSON('YouTube SEO for "'+kanal+'", topic "'+topic+'".\nJSON ONLY:\n{"title":"under 60 chars","description_full":"200 words with keywords","tags":["t1","t2","t3","t4","t5","t6","t7","t8","t9","t10"],"thumbnail_text":"3-5 words"}','YouTube SEO Expert. JSON ONLY.');
     if(seo){
-      document.getElementById('yt-seo').innerHTML=
-        '<div style="margin-bottom:8px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">TITLE — click copy</div><div style="font-size:13px;font-weight:700;padding:6px;background:var(--surface);border-radius:3px;cursor:pointer" onclick="navigator.clipboard.writeText(this.textContent)">'+seo.title+'</div></div>'+
-        '<div style="margin-bottom:8px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">THUMBNAIL</div><div style="font-size:13px;font-weight:700;color:var(--red);padding:6px;background:var(--surface);border-radius:3px">'+seo.thumbnail_text+'</div></div>'+
-        '<div style="margin-bottom:8px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">TAGS</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">'+(seo.tags||[]).map(function(t){return '<span class="badge b-blue" style="cursor:pointer" onclick="navigator.clipboard.writeText(''+t+'')">'+t+'</span>';}).join('')+'</div></div>'+
-        '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">DESCRIPTION — click copy</div><div style="font-size:11px;color:#aaa;padding:6px;background:var(--surface);border-radius:3px;cursor:pointer;max-height:80px;overflow-y:auto" onclick="navigator.clipboard.writeText(this.textContent)">'+(seo.description_full||'')+'</div></div>';
+      var seoHTML='<div style="margin-bottom:8px"><b>TITLE</b><br><div style="padding:6px;background:var(--surface);border-radius:3px;cursor:pointer;font-weight:700" onclick="navigator.clipboard.writeText(this.textContent)">'+seo.title+'</div></div>';
+      seoHTML+='<div style="margin-bottom:8px"><b>THUMBNAIL</b><br><div style="padding:6px;background:var(--surface);border-radius:3px;color:var(--red);font-weight:700">'+seo.thumbnail_text+'</div></div>';
+      seoHTML+='<div style="margin-bottom:8px"><b>TAGS</b><br><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">'+(seo.tags||[]).map(function(t){return '<span class="badge b-blue" style="cursor:pointer" onclick="navigator.clipboard.writeText(this.textContent)">'+t+'</span>';}).join('')+'</div></div>';
+      seoHTML+='<div><b>DESCRIPTION</b><br><div style="font-size:11px;color:#aaa;padding:6px;background:var(--surface);border-radius:3px;cursor:pointer;max-height:80px;overflow-y:auto" onclick="navigator.clipboard.writeText(this.textContent)">'+(seo.description_full||seo.description||'')+'</div></div>';
+      document.getElementById('yt-seo').innerHTML=seoHTML;
     }
   }
   if(doShorts){
