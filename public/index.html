@@ -1009,6 +1009,37 @@ hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
       <h3>🛡️ Auto Slop-Check</h3>
       <div id="plat-slop" style="margin-top:8px"></div>
     </div>
+    <!-- ANTI-AI PATTERN FILTER -->
+    <div class="info-card" style="margin-top:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3>🧠 Anti-AI Pattern Filter</h3>
+        <button class="btn btn-red" style="font-size:10px;padding:5px 10px" onclick="runAntiAIFilter()">🔍 Script analysieren & fixen</button>
+      </div>
+      <div class="alert alert-blue" style="margin-bottom:8px">
+        <span>💡</span><span style="font-size:11px">Erkennt typische Claude/GPT/Gemini Muster die alle Creator verwenden — und macht dein Script einzigartig.</span>
+      </div>
+      <div id="anti-ai-result" style="display:none">
+        <div class="g2" style="gap:8px;margin-bottom:8px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:6px">GEFUNDENE AI-MUSTER</div>
+            <div id="ai-patterns-found" style="font-size:11px;line-height:1.8"></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-bottom:6px">UNIQUENESS SCORE</div>
+            <div id="ai-unique-score" style="font-size:32px;font-weight:700;font-family:var(--display)">—</div>
+            <div id="ai-unique-label" style="font-size:11px;color:var(--muted)"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:8px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:6px">GEFIXTER SCRIPT — klingt nach dir, nicht nach KI</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:11px;color:var(--yellow)">Klicken um in Script zu übernehmen</span>
+            <button class="btn btn-green" style="font-size:10px;padding:3px 8px" onclick="applyFixedScript()">✅ Übernehmen</button>
+          </div>
+          <div id="ai-fixed-script" class="ai-box" style="font-size:11px;white-space:pre-wrap;max-height:300px;overflow-y:auto;cursor:pointer" onclick="copyEl('ai-fixed-script')"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2508,9 +2539,20 @@ async function checkCompetitors(){
   const topic=document.getElementById('plat-topic').value.trim();
   if(!topic){alert('Thema eingeben');return;}
   const el=document.getElementById('comp-result');
-  el.style.display='block';el.textContent='Checking...';el.className='ai-box loading';
-  const r=await claude('YouTube competitor check for Motivation/Discipline niche.\nTopic: "'+topic+'"\n1. Oversaturation (0-10)?\n2. Recent channels?\n3. Unique angle?\n4. Good timing?\nDirect, specific.','YouTube Expert.');
+  el.style.display='block';el.textContent='Checking competitors...';el.className='ai-box loading';
+  const r=await claude(
+    'YouTube competitor analysis for Motivation/Discipline niche.\nTopic: "'+topic+'"\n\n1. Oversaturation (0-10)?\n2. Which channels covered it recently and what angle did they use?\n3. What UNIQUE angle should this creator take to stand out?\n4. What should the script AVOID that others already do?\n5. Good timing?\n\nBe specific. The goal is to make this script sound different from everyone else.',
+    'YouTube Market Expert. Focus on differentiation and unique angles.'
+  );
   el.className='ai-box';el.textContent=r;
+  localStorage.setItem('cos_comp_analysis', r);
+  addNotif('Konkurrenz gecheckt','Wird beim nächsten Script automatisch berücksichtigt','green');
+}
+
+function getCompAnalysis(){
+  const saved=localStorage.getItem('cos_comp_analysis');
+  if(!saved) return '';
+  return '\n\nCOMPETITOR ANALYSIS — use this to differentiate the script from existing content:\n'+saved.substring(0,600);
 }
 async function runPlatformEngine(){
   const topic=document.getElementById('plat-topic').value.trim();
@@ -2527,12 +2569,13 @@ async function runPlatformEngine(){
   currentPlatData={topic,kanal};
   const dna=getDNAPrompt();
   const prof=getProfilContext();
+  const comp=getCompAnalysis();
   const langStr=lang==='de'?'Write in German.':lang==='both'?'Write in English (main) and German (second).':'Write in English.';
   const voiceTags='Use ONLY English emotion tags: [thoughtful], [serious], [motivated], [energetic], [calm]. CAPS for emphasis. ... for pauses. No German words in tags.';
   if(doYT){
     document.getElementById('yt-script').textContent='Generating...';
     document.getElementById('yt-voice').textContent='Generating...';
-    const script=await aiCall('Write YouTube script for "'+kanal+'".\nTopic: "'+topic+'"\nLength: 3-5 min (~500-750 words).\n'+langStr+'\n\nTimestamped:\n[0:00-0:08] HOOK\n[0:08-0:30] SETUP\n[0:30-1:30] POINT 1\n[1:30-2:30] POINT 2\n[2:30-3:30] POINT 3\n[3:30-4:30] THE TURN\n[4:30-5:00] CTA\n\nEnd with word count and runtime.'+dna+prof,'Ghostwriter for "'+kanal+'". Never sounds like AI. Direct, motivating.');
+    const script=await aiCall('Write YouTube script for "'+kanal+'".\nTopic: "'+topic+'"\nLength: 3-5 min (~500-750 words).\n'+langStr+'\n\nTimestamped:\n[0:00-0:08] HOOK\n[0:08-0:30] SETUP\n[0:30-1:30] POINT 1\n[1:30-2:30] POINT 2\n[2:30-3:30] POINT 3\n[3:30-4:30] THE TURN\n[4:30-5:00] CTA\n\nEnd with word count and runtime.'+dna+prof+comp,'Ghostwriter for "'+kanal+'". Never sounds like AI. Direct, motivating. MUST differentiate from competitors.');
     document.getElementById('yt-script').textContent=script;
     const voice=await aiCall('Convert for ElevenLabs:\n\n'+script+'\n\n'+voiceTags+'\nNo timestamps. Flowing.','ElevenLabs Expert. English tags only.');
     document.getElementById('yt-voice').textContent=voice;
@@ -2701,6 +2744,50 @@ async function genBildprompts(){
   }
   setStat('AKTIV');
 }
+
+// ═══════════════════════════════════════
+// ANTI-AI PATTERN FILTER
+// ═══════════════════════════════════════
+async function runAntiAIFilter(){
+  const script=document.getElementById('yt-script')?.textContent?.trim();
+  if(!script||script==='Generating...'){alert('Erst Script generieren');return;}
+  setStat('ANALYSIERT AI-MUSTER...');
+  document.getElementById('anti-ai-result').style.display='block';
+  document.getElementById('ai-fixed-script').className='ai-box loading';
+  document.getElementById('ai-fixed-script').textContent='Analysiere...';
+  const j=await claudeJSON(
+    'Detect AI-generated content patterns from Claude, GPT-4, and Gemini in this YouTube script:\n\n"""\n'+script.substring(0,2000)+'\n"""\n\nCommon AI patterns:\n- "In today\'s video", "Let\'s dive in", "Welcome back"\n- Numbered lists 1.2.3. that sound mechanical\n- "It\'s important to note", "This is crucial", "Game changer"\n- Overly smooth transitions\n- Generic motivational phrases\n- "At the end of the day", "Level up"\n- Starting with "So," or "Now,"\n\nJSON ONLY:\n{"patterns_found":["pattern1","pattern2"],"uniqueness_score":6,"uniqueness_label":"Moderate — needs work","total_patterns":3}',
+    'AI Pattern Detection Expert. JSON ONLY.'
+  );
+  if(j){
+    var scoreColor=j.uniqueness_score>=8?'var(--green)':j.uniqueness_score>=5?'var(--yellow)':'var(--red)';
+    document.getElementById('ai-unique-score').textContent=j.uniqueness_score+'/10';
+    document.getElementById('ai-unique-score').style.color=scoreColor;
+    document.getElementById('ai-unique-label').textContent=j.uniqueness_label||'';
+    document.getElementById('ai-patterns-found').innerHTML=(j.patterns_found||[]).map(function(p){
+      return '<div style="padding:3px 0;border-bottom:1px solid var(--border);display:flex;gap:6px;font-size:11px"><span style="color:var(--red)">✗</span>'+p+'</div>';
+    }).join('')||'<div style="color:var(--green);font-size:11px">Keine typischen AI-Muster gefunden</div>';
+  }
+  var kanal=document.getElementById('plat-kanal')?.value||'The Silent Grind';
+  var patternsStr=(j?.patterns_found||[]).join(', ');
+  var fixedScript=await claude(
+    'Rewrite this YouTube script to sound completely human and unique.\n\nOriginal:\n"""\n'+script.substring(0,2000)+'\n"""\n\nAI patterns to remove: '+patternsStr+'\n\nRules:\n1. Remove ALL AI patterns\n2. Use incomplete sentences occasionally\n3. Raw, direct personality — no corporate polish\n4. Break the perfect 1-2-3 structure\n5. Unexpected word choices\n6. Sound like a real person talking passionately\n7. Keep timestamps\n8. Same message, completely different voice\n\nDo NOT use common AI phrases. Sound human.',
+    'Expert editor removing AI patterns. Channel: "'+kanal+'". Human, unique, passionate.'
+  );
+  document.getElementById('ai-fixed-script').className='ai-box';
+  document.getElementById('ai-fixed-script').style.whiteSpace='pre-wrap';
+  document.getElementById('ai-fixed-script').textContent=fixedScript;
+  addNotif('Anti-AI Filter','Script optimiert — klingt jetzt nach dir','green');
+  setStat('AKTIV');
+}
+function applyFixedScript(){
+  var fixed=document.getElementById('ai-fixed-script')?.textContent;
+  if(!fixed) return;
+  document.getElementById('yt-script').textContent=fixed;
+  addNotif('Script übernommen','Gefixter Script ist jetzt aktiv','green');
+  document.getElementById('yt-script').scrollIntoView({behavior:'smooth'});
+}
+
 async function genMusicPrompt(){
   const topic=document.getElementById('plat-topic').value.trim()||currentPlatData.topic||'motivation discipline';
   const style=document.getElementById('music-style')?.value||'dark cinematic motivational';
