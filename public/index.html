@@ -815,6 +815,51 @@ hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
         </select>
       </div>
     </div>
+
+    <!-- STYLE LOCK -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--yellow);letter-spacing:1px">🎨 STYLE LOCK — Konsistenz über alle Clips</span>
+        <button class="btn btn-outline" style="font-size:9px;padding:3px 8px" onclick="resetStyleLock()">Reset</button>
+      </div>
+      <div class="g2" style="gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-family:var(--mono);font-size:9px;color:var(--muted);display:block;margin-bottom:3px">VISUELLER STIL (wird an JEDEN Prompt angehängt)</label>
+          <select class="input-field" id="style-lock-preset" style="cursor:pointer;font-size:11px" onchange="applyStylePreset()">
+            <option value="custom">Eigener Stil (unten eingeben)</option>
+            <option value="silent_grind" selected>🔴 The Silent Grind — Dark Cinematic</option>
+            <option value="documentary">📹 Documentary — Clean & Professional</option>
+            <option value="lofi">🎧 Lofi — Warm & Nostalgic</option>
+            <option value="tech">💻 Tech — Futuristic & Blue</option>
+            <option value="nature">🌿 Nature — Organic & Calm</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:9px;color:var(--muted);display:block;margin-bottom:3px">KLING CREATIVITY (niedrig = konsistenter)</label>
+          <select class="input-field" id="kling-creativity" style="cursor:pointer;font-size:11px">
+            <option value="0.3">0.3 — Sehr konsistent</option>
+            <option value="0.5" selected>0.5 — Ausgewogen</option>
+            <option value="0.7">0.7 — Kreativ</option>
+            <option value="1.0">1.0 — Maximum Kreativität</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:9px;color:var(--muted);display:block;margin-bottom:3px">STYLE LOCK TEXT (automatisch an alle Prompts)</label>
+        <textarea class="input-field" id="style-lock-text" rows="2" style="resize:vertical;width:100%;font-size:11px" placeholder="z.B. dark cinematic, high contrast, muted colors, red accents, no faces, foggy atmosphere, 35mm film aesthetic"></textarea>
+      </div>
+      <!-- Referenzbild -->
+      <div style="margin-top:8px">
+        <label style="font-family:var(--mono);font-size:9px;color:var(--muted);display:block;margin-bottom:3px">📸 REFERENZBILD für Google Flow (optional — gibt Stil-Orientierung)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="drop-zone" id="style-ref-zone" style="padding:10px;min-height:60px;flex:1;cursor:pointer" onclick="document.getElementById('style-ref-input').click()" ondragover="event.preventDefault()" ondrop="handleStyleRefDrop(event)">
+            <div id="style-ref-preview" style="text-align:center;font-size:11px;color:var(--muted)">Referenzbild hier ablegen oder klicken</div>
+            <input type="file" id="style-ref-input" style="display:none" accept="image/*" onchange="handleStyleRefFile(event)">
+          </div>
+          <button class="btn btn-outline" style="font-size:10px;padding:5px 8px" onclick="clearStyleRef()">✕</button>
+        </div>
+      </div>
+    </div>
     <div style="margin-bottom:12px">
       <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:6px">PLATTFORMEN</label>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
@@ -2548,8 +2593,114 @@ function loadPlatHistory(i){
 }
 
 // ═══════════════════════════════════════
-// MUSIK GENERATOR
+// STYLE LOCK
 // ═══════════════════════════════════════
+const STYLE_PRESETS = {
+  silent_grind: 'dark cinematic aesthetic, deep shadows, high contrast, muted desaturated colors with subtle red accents, no human faces, urban minimalist environment, foggy atmospheric haze, 35mm film grain, moody noir lighting, slow motion feel, professional color grading',
+  documentary: 'clean documentary style, natural lighting, neutral colors, professional corporate aesthetic, sharp focus, minimal shadows, no faces, modern office or urban setting',
+  lofi: 'warm vintage aesthetic, soft grain, muted warm tones, nostalgic 90s feel, cozy indoor lighting, analog film look, soft focus edges',
+  tech: 'futuristic tech aesthetic, deep blue and cyan tones, neon accents, dark background, holographic elements, clean geometric shapes, no faces',
+  nature: 'organic natural aesthetic, soft green and earth tones, gentle lighting, peaceful outdoor environment, minimal motion, cinematic nature photography'
+};
+
+let styleRefData = null;
+
+function applyStylePreset(){
+  const preset = document.getElementById('style-lock-preset')?.value;
+  if(preset && preset !== 'custom' && STYLE_PRESETS[preset]){
+    document.getElementById('style-lock-text').value = STYLE_PRESETS[preset];
+    localStorage.setItem('cos_style_lock', STYLE_PRESETS[preset]);
+  }
+}
+
+function resetStyleLock(){
+  document.getElementById('style-lock-preset').value = 'silent_grind';
+  document.getElementById('style-lock-text').value = STYLE_PRESETS.silent_grind;
+  localStorage.setItem('cos_style_lock', STYLE_PRESETS.silent_grind);
+}
+
+function getStyleLock(){
+  return document.getElementById('style-lock-text')?.value || STYLE_PRESETS.silent_grind;
+}
+
+function handleStyleRefDrop(e){
+  e.preventDefault();
+  if(e.dataTransfer.files[0]) processStyleRefFile(e.dataTransfer.files[0]);
+}
+function handleStyleRefFile(e){
+  if(e.target.files[0]) processStyleRefFile(e.target.files[0]);
+}
+function processStyleRefFile(f){
+  const r = new FileReader();
+  r.onload = e => {
+    styleRefData = {data: e.target.result.split(',')[1], type: f.type};
+    document.getElementById('style-ref-preview').innerHTML =
+      '<img src="'+e.target.result+'" style="max-height:50px;border-radius:3px"> <span style="color:var(--green);font-size:10px">✓ '+f.name+'</span>';
+    addNotif('Referenzbild','Wird bei allen Bildprompts als Stil-Anker genutzt','green');
+  };
+  r.readAsDataURL(f);
+}
+function clearStyleRef(){
+  styleRefData = null;
+  document.getElementById('style-ref-preview').innerHTML = 'Referenzbild hier ablegen oder klicken';
+  document.getElementById('style-ref-input').value = '';
+}
+
+// Load saved style lock
+window.addEventListener('load', function(){
+  const saved = localStorage.getItem('cos_style_lock');
+  if(saved) document.getElementById('style-lock-text').value = saved;
+  else applyStylePreset();
+});
+
+// ═══════════════════════════════════════
+// BILDPROMPTS — MIT STYLE LOCK
+// ═══════════════════════════════════════
+async function genBildprompts(){
+  const topic=document.getElementById('plat-topic').value.trim()||currentPlatData.topic||'';
+  const kanal=document.getElementById('plat-kanal')?.value||'The Silent Grind';
+  const clipLen=parseInt(document.getElementById('plat-clip-len')?.value||'8');
+  const numPrompts=Math.ceil(180/clipLen);
+  const styleLock=getStyleLock();
+  const creativity=document.getElementById('kling-creativity')?.value||'0.5';
+  if(!topic){alert('Thema eingeben');return;}
+  
+  localStorage.setItem('cos_style_lock', styleLock);
+  setStat('GENERIERT PROMPTS...');
+  document.getElementById('plat-results').style.display='block';
+  setPlatTab('yt');
+  const infoEl=document.getElementById('yt-prompts-info');
+  const promptsEl=document.getElementById('yt-prompts');
+  if(infoEl) infoEl.textContent=numPrompts+' Prompts × '+clipLen+' Sek = '+Math.round(numPrompts*clipLen/60)+' Min | Kling Creativity: '+creativity+' | Klick = Kopieren';
+  promptsEl.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Generiere '+numPrompts+' konsistente Bildprompts...</div>';
+
+  const refNote = styleRefData ? 'Use the reference image style as strict visual anchor for ALL scenes.' : '';
+
+  const j=await claudeJSON(
+    'Create EXACTLY '+numPrompts+' image prompts for Kling AI / Google Flow.\nVideo topic: "'+topic+'" for channel "'+kanal+'"\nEach clip: '+clipLen+' seconds\nTotal: '+Math.round(numPrompts*clipLen/60)+' minutes\n\nCRITICAL STYLE CONSISTENCY RULES:\n- EVERY prompt MUST end with this exact style lock: "'+styleLock+'"\n- Keep all scenes visually consistent — same color palette, same atmosphere\n- No faces, no text overlays in any scene\n- Progress through the video narrative naturally\n'+refNote+'\nKling creativity setting: '+creativity+' (lower = more consistent)\n\nJSON ONLY:\n{"prompts":[{"scene":1,"timestamp":"0:00-0:'+String(clipLen).padStart(2,'0')+'","visual":"What you see (English)","prompt":"Full cinematic prompt + STYLE LOCK appended","mood":"one word","flow_note":"For Google Flow: start from previous clip end frame"}]}',
+    'Video Director specializing in visual consistency. Every prompt must maintain the same aesthetic. JSON ONLY.'
+  );
+
+  if(j&&j.prompts&&j.prompts.length>0){
+    promptsEl.innerHTML=
+      '<div style="background:var(--surface);border:1px solid var(--yellow);border-radius:4px;padding:8px;margin-bottom:10px;font-size:11px">'+
+      '<span style="color:var(--yellow)">🎨 STYLE LOCK AKTIV</span> — '+styleLock.substring(0,80)+'...</div>'+
+      j.prompts.map(function(p,i){
+        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px">'+
+          '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
+          '<span style="font-family:var(--mono);font-size:10px;color:var(--red)">SCENE '+(p.scene||i+1)+' ['+(p.timestamp||'')+'] · '+clipLen+'s</span>'+
+          '<span style="font-size:10px;color:var(--muted)">'+(p.mood||'')+'</span></div>'+
+          '<div style="font-size:11px;color:#aaa;margin-bottom:4px">'+(p.visual||'')+'</div>'+
+          (p.flow_note?'<div style="font-size:10px;color:var(--blue);margin-bottom:4px">Flow: '+p.flow_note+'</div>':'')+
+          '<div style="background:#0D0D0D;border-left:3px solid var(--green);padding:8px;font-family:var(--mono);font-size:10px;color:#ccc;cursor:pointer;border-radius:0 3px 3px 0;line-height:1.5" onclick="navigator.clipboard.writeText(this.textContent);this.style.borderLeftColor=\'var(--yellow)\';setTimeout(()=>this.style.borderLeftColor=\'var(--green)\',1500)">'+(p.prompt||'')+'</div>'+
+        '</div>';
+      }).join('');
+    addNotif('Bildprompts',j.prompts.length+' konsistente Prompts × '+clipLen+'s — Style Lock aktiv','green');
+  }else{
+    promptsEl.innerHTML='<div class="alert alert-red"><span>❌</span><span>Fehler — nochmal versuchen</span></div>';
+  }
+  setStat('AKTIV');
+}
 async function genMusicPrompt(){
   const topic=document.getElementById('plat-topic').value.trim()||currentPlatData.topic||'motivation discipline';
   const style=document.getElementById('music-style')?.value||'dark cinematic motivational';
