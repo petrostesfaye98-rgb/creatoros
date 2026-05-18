@@ -2701,7 +2701,16 @@ async function runPlatformEngine(){
     var col=sc.verdict==='SAFE'?'var(--green)':'var(--yellow)';
     document.getElementById('plat-slop').innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface);border-radius:4px"><span style="font-size:24px">'+(sc.verdict==='SAFE'?'🟢':'🟡')+'</span><div><div style="font-weight:700;color:'+col+'">'+sc.verdict+' ('+sc.score+'/10)</div><div style="font-size:12px;color:#aaa;margin-top:2px">'+sc.reason+'</div><div style="font-size:11px;color:var(--yellow);margin-top:4px">'+sc.tip+'</div></div></div>';
   }
-  platHistory.unshift({topic,kanal,date:new Date().toLocaleDateString('de-DE'),preview:(document.getElementById('yt-script').textContent||'').substring(0,80)});
+  // Save full content to history
+  var histEntry = {
+    topic,
+    kanal,
+    date:new Date().toLocaleDateString('de-DE'),
+    script:(document.getElementById('yt-script').textContent||'').substring(0,3000),
+    voice:(document.getElementById('yt-voice').textContent||'').substring(0,3000),
+    seo:document.getElementById('yt-seo')?.innerHTML||''
+  };
+  platHistory.unshift(histEntry);
   if(platHistory.length>10) platHistory=platHistory.slice(0,10);
   localStorage.setItem('cos_plat_history',JSON.stringify(platHistory));
   renderPlatHistory();
@@ -2730,9 +2739,27 @@ function loadPlatHistory(i){
   var h=platHistory[i];if(!h)return;
   document.getElementById('plat-topic').value=h.topic;
   if(h.kanal) document.getElementById('plat-kanal').value=h.kanal;
-  addNotif('Verlauf','Thema "'+h.topic+'" geladen — jetzt Bildprompts generieren','blue');
-  // Scroll to generate button
-  document.getElementById('plat-topic').scrollIntoView({behavior:'smooth'});
+  // Show results panel
+  document.getElementById('plat-results').style.display='block';
+  setPlatTab('yt');
+  // Restore script
+  if(h.script){
+    var scriptEl=document.getElementById('yt-script');
+    if(scriptEl){scriptEl.textContent=h.script;scriptEl.style.whiteSpace='pre-wrap';}
+  }
+  // Restore voiceover
+  if(h.voice){
+    var voiceEl=document.getElementById('yt-voice');
+    if(voiceEl){voiceEl.textContent=h.voice;voiceEl.style.whiteSpace='pre-wrap';}
+  }
+  // Restore SEO
+  if(h.seo){
+    var seoEl=document.getElementById('yt-seo');
+    if(seoEl) seoEl.innerHTML=h.seo;
+  }
+  // Show ElevenLabs button if key exists
+  if(S.el) document.getElementById('el-direct').style.display='block';
+  addNotif('Verlauf geladen','"'+h.topic+'" — Script + Voice wiederhergestellt','green');
 }
 
 // ═══════════════════════════════════════
