@@ -484,6 +484,48 @@ hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
       </div>
     </div>
   </div>
+  <!-- NEUE APIs -->
+  <hr class="div">
+  <h3 style="font-family:var(--display);font-size:20px;letter-spacing:2px;margin-bottom:12px">🔌 WEITERE APIs</h3>
+  <div class="g2">
+    <div>
+      <div class="setup-card">
+        <h3>🎙️ ElevenLabs API Key</h3>
+        <p>Für automatisches Voiceover direkt aus der App. Holen: elevenlabs.io → Profile → API Key</p>
+        <div class="input-row"><input class="input-field" id="k-el" type="password" placeholder="el-..."><button class="btn btn-red" onclick="saveKey('el','k-el','s-el')">Speichern</button></div>
+        <span id="s-el" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+      </div>
+      <div class="setup-card">
+        <h3>🤖 OpenAI API Key</h3>
+        <p>GPT-4o als alternative KI für Scripts. Holen: platform.openai.com → API Keys</p>
+        <div class="input-row"><input class="input-field" id="k-openai" type="password" placeholder="sk-..."><button class="btn btn-red" onclick="saveKey('openai','k-openai','s-openai')">Speichern</button></div>
+        <span id="s-openai" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+      </div>
+    </div>
+    <div>
+      <div class="setup-card">
+        <h3>✨ Gemini API Key</h3>
+        <p>Google Gemini + Flow/Veo Video-Generierung. Holen: aistudio.google.com → API Keys</p>
+        <div class="input-row"><input class="input-field" id="k-gemini" type="password" placeholder="AIzaSy..."><button class="btn btn-red" onclick="saveKey('gemini','k-gemini','s-gemini')">Speichern</button></div>
+        <span id="s-gemini" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+      </div>
+      <div class="setup-card">
+        <h3>🎬 Kling AI API Keys</h3>
+        <p>Für automatische Video-Generierung. Access Key + Secret Key von klingai.com → API Plattform</p>
+        <div class="input-row" style="margin-bottom:6px"><input class="input-field" id="k-kling" type="password" placeholder="Access Key..."><button class="btn btn-red" onclick="saveKey('kling','k-kling','s-kling')">Speichern</button></div>
+        <span id="s-kling" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+        <div class="input-row" style="margin-top:8px"><input class="input-field" id="k-kling-secret" type="password" placeholder="Secret Key..."><button class="btn btn-red" onclick="saveKey('klingSecret','k-kling-secret','s-kling-secret')">Speichern</button></div>
+        <span id="s-kling-secret" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+      </div>
+    </div>
+  </div>
+  <!-- ElevenLabs Voice ID -->
+  <div class="setup-card">
+    <h3>🎙️ ElevenLabs Voice ID</h3>
+    <p>Deine Voice ID für automatisches Voiceover. In ElevenLabs unter "Voices" → deine Stimme → ID kopieren</p>
+    <div class="input-row"><input class="input-field" id="k-voice-id" type="text" placeholder="21m00Tcm4TlvDq8ikWAM (Beispiel)"><button class="btn btn-red" onclick="saveKey('voiceId','k-voice-id','s-voice-id')">Speichern</button></div>
+    <span id="s-voice-id" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+  </div>
   <button class="btn btn-yellow" onclick="testAll()">⚡ Alle Verbindungen testen</button>
   <div id="test-result" class="ai-box" style="display:none;margin-top:12px"></div>
   <hr class="div">
@@ -740,13 +782,23 @@ hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
     <h3>🎯 Thema & Einstellungen</h3>
     <div style="margin-bottom:10px">
       <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">THEMA / IDEE</label>
-      <textarea class="input-field" id="plat-topic" rows="2" style="resize:vertical;width:100%" placeholder="z.B. 'Warum 99% aufgeben bevor es anfängt'"></textarea>
+      <textarea class="input-field" id="plat-topic" rows="2" style="resize:vertical;width:100%" placeholder="z.B. 'Why 99% quit before it gets good'"></textarea>
     </div>
     <div class="g2" style="gap:8px;margin-bottom:10px">
       <div>
         <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">KANAL</label>
         <input class="input-field" id="plat-kanal" placeholder="The Silent Grind" value="The Silent Grind">
       </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">KI-MODELL</label>
+        <select class="input-field" id="plat-ai" style="cursor:pointer">
+          <option value="claude">🤖 Claude (Anthropic)</option>
+          <option value="gemini">✨ Gemini (Google)</option>
+          <option value="openai">💚 GPT-4o (OpenAI)</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2" style="gap:8px;margin-bottom:10px">
       <div>
         <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">SPRACHE</label>
         <select class="input-field" id="plat-lang" style="cursor:pointer">
@@ -755,24 +807,109 @@ hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
           <option value="both">Beide</option>
         </select>
       </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">CLIP-LÄNGE (Kling/Flow)</label>
+        <select class="input-field" id="plat-clip-len" style="cursor:pointer" onchange="updatePromptsPreview()">
+          <option value="5">5 Sek</option>
+          <option value="8" selected>8 Sek</option>
+          <option value="10">10 Sek</option>
+          <option value="15">15 Sek</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2" style="gap:8px;margin-bottom:10px">
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:4px">ZIEL-LÄNGE VIDEO</label>
+        <select class="input-field" id="plat-target-mins" style="cursor:pointer" onchange="updatePromptsPreview()">
+          <option value="1">1 Min (Shorts)</option>
+          <option value="3" selected>3 Min</option>
+          <option value="5">5 Min</option>
+          <option value="10">10 Min</option>
+          <option value="20">20 Min (Doku)</option>
+          <option value="30">30 Min (Doku lang)</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <div id="prompts-preview" style="font-family:var(--mono);font-size:10px;color:var(--yellow);padding:8px">23 Prompts × 8s = 3 Min</div>
+      </div>
+    </div>
+
+    <!-- STYLE LOCK -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--yellow);letter-spacing:1px">🎨 STYLE LOCK — Konsistenz über alle Clips</span>
+        <button class="btn btn-outline" style="font-size:9px;padding:3px 8px" onclick="resetStyleLock()">Reset</button>
+      </div>
+      <div class="g2" style="gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-family:var(--mono);font-size:9px;color:var(--muted);display:block;margin-bottom:3px">VISUELLER STIL (wird an JEDEN Prompt angehängt)</label>
+          <select class="input-field" id="style-lock-preset" style="cursor:pointer;font-size:11px" onchange="applyStylePreset()">
+            <option value="custom">Eigener Stil (unten eingeben)</option>
+            <option value="silent_grind" selected>🔴 The Silent Grind — Dark Cinematic</option>
+            <option value="documentary">📹 Documentary — Clean & Professional</option>
+            <option value="lofi">🎧 Lofi — Warm & Nostalgic</option>
+            <option value="tech">💻 Tech — Futuristic & Blue</option>
+            <option value="nature">🌿 Nature — Organic & Calm</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:9px;color:var(--muted);display:block;margin-bottom:3px">KLING CREATIVITY (niedrig = konsistenter)</label>
+          <select class="input-field" id="kling-creativity" style="cursor:pointer;font-size:11px">
+            <option value="0.3">0.3 — Sehr konsistent</option>
+            <option value="0.5" selected>0.5 — Ausgewogen</option>
+            <option value="0.7">0.7 — Kreativ</option>
+            <option value="1.0">1.0 — Maximum Kreativität</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:9px;color:var(--muted);display:block;margin-bottom:3px">STYLE LOCK TEXT (automatisch an alle Prompts)</label>
+        <textarea class="input-field" id="style-lock-text" rows="2" style="resize:vertical;width:100%;font-size:11px" placeholder="z.B. dark cinematic, high contrast, muted colors, red accents, no faces, foggy atmosphere, 35mm film aesthetic"></textarea>
+      </div>
+      <!-- Referenzbild -->
+      <div style="margin-top:8px">
+        <label style="font-family:var(--mono);font-size:9px;color:var(--muted);display:block;margin-bottom:3px">📸 REFERENZBILD für Google Flow (optional — gibt Stil-Orientierung)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="drop-zone" id="style-ref-zone" style="padding:10px;min-height:60px;flex:1;cursor:pointer" onclick="document.getElementById('style-ref-input').click()" ondragover="event.preventDefault()" ondrop="handleStyleRefDrop(event)">
+            <div id="style-ref-preview" style="text-align:center;font-size:11px;color:var(--muted)">Referenzbild hier ablegen oder klicken</div>
+            <input type="file" id="style-ref-input" style="display:none" accept="image/*" onchange="handleStyleRefFile(event)">
+          </div>
+          <button class="btn btn-outline" style="font-size:10px;padding:5px 8px" onclick="clearStyleRef()">✕</button>
+        </div>
+      </div>
     </div>
     <div style="margin-bottom:12px">
       <label style="font-family:var(--mono);font-size:10px;color:var(--muted);display:block;margin-bottom:6px">PLATTFORMEN</label>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
-        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;background:var(--surface);padding:6px 12px;border-radius:4px;border:1px solid var(--border)"><input type="checkbox" id="plat-yt" checked> 📺 YouTube (2:30-3 Min)</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;background:var(--surface);padding:6px 12px;border-radius:4px;border:1px solid var(--border)"><input type="checkbox" id="plat-yt" checked> 📺 YouTube (3-5 Min)</label>
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;background:var(--surface);padding:6px 12px;border-radius:4px;border:1px solid var(--border)"><input type="checkbox" id="plat-shorts" checked> 📱 Shorts (60 Sek)</label>
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;background:var(--surface);padding:6px 12px;border-radius:4px;border:1px solid var(--border)"><input type="checkbox" id="plat-tiktok"> ⬛ TikTok (45 Sek)</label>
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;background:var(--surface);padding:6px 12px;border-radius:4px;border:1px solid var(--border)"><input type="checkbox" id="plat-ig"> 📸 Instagram (20 Sek)</label>
       </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-red" onclick="runPlatformEngine()">🚀 Alles generieren</button>
-      <button class="btn btn-yellow" onclick="checkCompetitors()">🔍 Konkurrenz checken</button>
+      <button class="btn btn-red" onclick="runPlatformEngine()">🚀 Script + Voice + SEO</button>
+      <button class="btn btn-yellow" onclick="genBildprompts()">🖼️ Bildprompts generieren</button>
+      <button class="btn btn-outline" onclick="checkCompetitors()">🔍 Konkurrenz checken</button>
+      <button class="btn btn-outline" onclick="translateScript()">🇩🇪 Übersetzen</button>
     </div>
     <div id="comp-result" style="display:none;margin-top:10px" class="ai-box"></div>
+    <!-- ElevenLabs direkt -->
+    <div id="el-direct" style="display:none;margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--green)">🎙️ ELEVENLABS — DIREKT GENERIEREN</span>
+        <button class="btn btn-red" style="font-size:10px;padding:5px 10px" onclick="genElevenLabsAudio()">▶ MP3 generieren</button>
+      </div>
+      <div id="el-audio-result"></div>
+    </div>
   </div>
 
   <div id="plat-results" style="display:none;margin-top:14px">
+    <!-- Verlauf -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">VERLAUF</span>
+      <div style="display:flex;gap:4px" id="plat-history-btns"></div>
+    </div>
     <div style="display:flex;gap:4px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);padding:4px;border-radius:4px;margin-bottom:14px">
       <button class="btn btn-red" id="ptab-yt" onclick="setPlatTab('yt')" style="font-size:11px;padding:6px 12px">📺 YouTube</button>
       <button class="btn btn-outline" id="ptab-shorts" onclick="setPlatTab('shorts')" style="font-size:11px;padding:6px 12px;border:none;color:var(--muted)">📱 Shorts</button>
@@ -783,19 +920,38 @@ hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
     <div id="pres-yt">
       <div class="g2" style="gap:10px;margin-bottom:10px">
         <div class="info-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3>🎬 Script + Zeitstempel</h3><button class="btn btn-outline" style="font-size:10px" onclick="copyEl('yt-script')">📋</button></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <h3>🎬 Script + Zeitstempel</h3>
+            <div style="display:flex;gap:4px">
+              <button class="btn btn-outline" style="font-size:10px" onclick="copyEl('yt-script')">📋</button>
+              <button class="btn btn-outline" style="font-size:10px" onclick="translateEl('yt-script')">🇩🇪</button>
+            </div>
+          </div>
           <div id="yt-script" class="ai-box" style="font-size:11px;line-height:1.8;white-space:pre-wrap"></div>
         </div>
         <div>
           <div class="info-card" style="margin-bottom:10px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3>🎙️ ElevenLabs Voiceover</h3><button class="btn btn-outline" style="font-size:10px" onclick="copyEl('yt-voice')">📋</button></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <h3>🎙️ ElevenLabs Voiceover</h3>
+              <div style="display:flex;gap:4px">
+                <button class="btn btn-outline" style="font-size:10px" onclick="copyEl('yt-voice')">📋</button>
+                <button class="btn btn-green" style="font-size:10px" onclick="genElevenLabsAudio()" title="Direkt MP3 generieren">🎙️ MP3</button>
+              </div>
+            </div>
             <div id="yt-voice" class="ai-box" style="font-size:11px;line-height:1.8;white-space:pre-wrap"></div>
           </div>
           <div class="info-card"><h3>📺 YouTube SEO</h3><div id="yt-seo" style="margin-top:8px"></div></div>
         </div>
       </div>
       <div class="info-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3>🖼️ Bildprompts Kling/Flow (synchron)</h3><button class="btn btn-outline" style="font-size:10px" onclick="copyEl('yt-prompts')">📋 Alle</button></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3>🖼️ Bildprompts Kling/Flow</h3>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-outline" style="font-size:10px" onclick="copyEl('yt-prompts')">📋 Alle</button>
+            <button class="btn btn-yellow" style="font-size:10px" onclick="genBildprompts()">🔄 Neu generieren</button>
+          </div>
+        </div>
+        <div id="yt-prompts-info" style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:8px"></div>
         <div id="yt-prompts"></div>
       </div>
     </div>
@@ -826,9 +982,81 @@ hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3>🖼️ Thumbnail Prompt</h3><button class="btn btn-outline" style="font-size:10px" onclick="copyEl('plat-thumb')">📋</button></div>
       <div id="plat-thumb" class="ai-box" style="font-size:11px"></div>
     </div>
+    <!-- MUSIK GENERATOR -->
+    <div class="info-card" style="margin-top:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3>🎵 Musik generieren</h3>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-red" style="font-size:10px;padding:5px 10px" onclick="genMusicPrompt()">🎵 Prompt erstellen</button>
+          <button class="btn btn-green" style="font-size:10px;padding:5px 10px" onclick="genElevenLabsMusic()" title="Direkt MP3 via ElevenLabs">🎙️ ElevenLabs MP3</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <select class="input-field" id="music-style" style="cursor:pointer;flex:1;min-width:140px">
+          <option value="dark cinematic motivational">🎬 Dark Cinematic</option>
+          <option value="lofi hip hop chill beats">🎧 Lofi Hip Hop</option>
+          <option value="epic orchestral dramatic">🎻 Epic Orchestral</option>
+          <option value="trap beats dark moody">🔊 Dark Trap</option>
+          <option value="ambient atmospheric">🌊 Ambient</option>
+          <option value="motivational uplifting">⚡ Motivational</option>
+          <option value="west coast hip hop">🎤 West Coast Hip Hop</option>
+          <option value="electronic synthwave">🎹 Synthwave</option>
+        </select>
+        <select class="input-field" id="music-duration" style="cursor:pointer;flex:1;min-width:120px">
+          <option value="30000">30 Sek</option>
+          <option value="60000" selected>60 Sek</option>
+          <option value="120000">2 Min</option>
+          <option value="180000">3 Min</option>
+        </select>
+        <select class="input-field" id="music-instrumental" style="cursor:pointer;flex:1;min-width:120px">
+          <option value="true" selected>🎵 Instrumental</option>
+          <option value="false">🎤 Mit Vocals</option>
+        </select>
+      </div>
+      <div id="music-prompt-box" style="display:none;margin-bottom:10px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:4px">SUNO / UDIO PROMPT — klicken zum kopieren</div>
+        <div id="music-suno-prompt" class="ai-box" style="font-size:11px;cursor:pointer;border-left:3px solid var(--yellow)" onclick="navigator.clipboard.writeText(this.textContent)"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <a href="https://suno.com/create" target="_blank" class="btn btn-outline" style="font-size:10px;text-decoration:none">→ Suno AI</a>
+          <a href="https://www.udio.com" target="_blank" class="btn btn-outline" style="font-size:10px;text-decoration:none">→ Udio</a>
+        </div>
+      </div>
+      <div id="music-el-result"></div>
+    </div>
     <div class="info-card" style="margin-top:10px">
       <h3>🛡️ Auto Slop-Check</h3>
       <div id="plat-slop" style="margin-top:8px"></div>
+    </div>
+    <!-- ANTI-AI PATTERN FILTER -->
+    <div class="info-card" style="margin-top:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3>🧠 Anti-AI Pattern Filter</h3>
+        <button class="btn btn-red" style="font-size:10px;padding:5px 10px" onclick="runAntiAIFilter()">🔍 Script analysieren & fixen</button>
+      </div>
+      <div class="alert alert-blue" style="margin-bottom:8px">
+        <span>💡</span><span style="font-size:11px">Erkennt typische Claude/GPT/Gemini Muster die alle Creator verwenden — und macht dein Script einzigartig.</span>
+      </div>
+      <div id="anti-ai-result" style="display:none">
+        <div class="g2" style="gap:8px;margin-bottom:8px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:6px">GEFUNDENE AI-MUSTER</div>
+            <div id="ai-patterns-found" style="font-size:11px;line-height:1.8"></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-bottom:6px">UNIQUENESS SCORE</div>
+            <div id="ai-unique-score" style="font-size:32px;font-weight:700;font-family:var(--display)">—</div>
+            <div id="ai-unique-label" style="font-size:11px;color:var(--muted)"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:8px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:6px">GEFIXTER SCRIPT — klingt nach dir, nicht nach KI</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:11px;color:var(--yellow)">Klicken um in Script zu übernehmen</span>
+            <button class="btn btn-green" style="font-size:10px;padding:3px 8px" onclick="applyFixedScript()">✅ Übernehmen</button>
+          </div>
+          <div id="ai-fixed-script" class="ai-box" style="font-size:11px;white-space:pre-wrap;max-height:300px;overflow-y:auto;cursor:pointer" onclick="copyEl('ai-fixed-script')"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1549,7 +1777,13 @@ const S = {
   claude: localStorage.getItem('cos_claude')||'',
   yt: localStorage.getItem('cos_yt')||'',
   ch: localStorage.getItem('cos_ch')||'',
-  niche: localStorage.getItem('cos_niche')||'AI Dokumentationen'
+  niche: localStorage.getItem('cos_niche')||'AI Dokumentationen',
+  el: localStorage.getItem('cos_el')||'',
+  voiceId: localStorage.getItem('cos_voiceId')||'21m00Tcm4TlvDq8ikWAM',
+  openai: localStorage.getItem('cos_openai')||'',
+  gemini: localStorage.getItem('cos_gemini')||'',
+  kling: localStorage.getItem('cos_kling')||'',
+  klingSecret: localStorage.getItem('cos_klingSecret')||''
 };
 
 let abData = {a:null,b:null};
@@ -1560,11 +1794,18 @@ window.onload = () => {
   if(S.yt){document.getElementById('k-yt').value='';setStatus('s-yt','✓ gespeichert — neu einfügen zum Ändern',true);}
   if(S.ch){document.getElementById('k-ch').value=S.ch;setStatus('s-ch','✓ gespeichert',true);}
   if(S.niche){document.getElementById('k-niche').value=S.niche;setStatus('s-niche','✓ gespeichert',true);}
+  if(S.el){document.getElementById('k-el').value='';setStatus('s-el','✓ gespeichert',true);}
+  if(S.openai){document.getElementById('k-openai').value='';setStatus('s-openai','✓ gespeichert',true);}
+  if(S.gemini){document.getElementById('k-gemini').value='';setStatus('s-gemini','✓ gespeichert',true);}
+  if(S.kling){document.getElementById('k-kling').value='';setStatus('s-kling','✓ Access Key gespeichert',true);}
+  if(S.klingSecret){document.getElementById('k-kling-secret').value='';setStatus('s-kling-secret','✓ Secret Key gespeichert',true);}
+  if(S.voiceId){document.getElementById('k-voice-id').value=S.voiceId;}
   updateAPIStatus();
   loadProfil();
   loadDNA();
   updateProfilBadge();
   updateBudgetDisplay();
+  renderPlatHistory();
 };
 
 function setStatus(id,msg,ok=false){
@@ -2198,8 +2439,11 @@ function setBudgetFromInput(){
 }
 
 // ═══════════════════════════════════════
-// PLATTFORM ENGINE
+// PLATTFORM ENGINE — KOMPLETT NEU
 // ═══════════════════════════════════════
+let platHistory = JSON.parse(localStorage.getItem('cos_plat_history')||'[]');
+let currentPlatData = {};
+
 function setPlatTab(tab){
   ['yt','shorts','tiktok','ig'].forEach(t=>{
     const el=document.getElementById('pres-'+t);
@@ -2208,152 +2452,600 @@ function setPlatTab(tab){
     if(btn){btn.className='btn '+(t===tab?'btn-red':'btn-outline');btn.style.border='none';btn.style.color=t===tab?'white':'var(--muted)';}
   });
 }
-
 function copyEl(id){
   const el=document.getElementById(id);
   if(el) navigator.clipboard.writeText(el.innerText||el.textContent).catch(()=>{});
   addNotif('Kopiert','In Zwischenablage','blue');
+}
+async function translateEl(id){
+  const el=document.getElementById(id);
+  if(!el||!el.textContent.trim()){alert('Erst generieren');return;}
+  const orig=el.textContent;
+  el.className='ai-box loading';
+  const r=await claude('Translate this YouTube script to German. Keep timestamps. Natural, not translated:\n\n'+orig,'Professional translator.');
+  el.className='ai-box';el.style.whiteSpace='pre-wrap';el.textContent=r;
+}
+async function translateScript(){await translateEl('yt-script');}
+async function aiCall(prompt,system){
+  const model=document.getElementById('plat-ai')?.value||'claude';
+  if(model==='gemini') return geminiCall(prompt,system||'');
+  if(model==='openai') return openaiCall(prompt,system||'');
+  return claude(prompt,system||'');
+}
+async function geminiCall(prompt,system){
+  if(!S.gemini) return 'Gemini API Key im Setup eingeben.';
+  try{
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+S.gemini,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:(system?system+'\n\n':'')+prompt}]}]})
+    });
+    const d=await r.json();
+    return d.candidates?.[0]?.content?.parts?.[0]?.text||'Keine Antwort';
+  }catch(e){return 'Gemini Fehler: '+e.message;}
+}
+async function openaiCall(prompt,system){
+  if(!S.openai) return 'OpenAI API Key im Setup eingeben.';
+  try{
+    const msgs=system?[{role:'system',content:system},{role:'user',content:prompt}]:[{role:'user',content:prompt}];
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.openai},
+      body:JSON.stringify({model:'gpt-4o',max_tokens:2000,messages:msgs})
+    });
+    const d=await r.json();
+    return d.choices?.[0]?.message?.content||'Keine Antwort';
+  }catch(e){return 'OpenAI Fehler: '+e.message;}
+}
+async function genElevenLabsAudio(){
+  if(!S.el){alert('ElevenLabs API Key im Setup eingeben');return;}
+  const voiceText=document.getElementById('yt-voice')?.textContent?.trim();
+  if(!voiceText){alert('Erst Voiceover generieren');return;}
+  document.getElementById('el-direct').style.display='block';
+  const resultEl=document.getElementById('el-audio-result');
+  resultEl.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Generiere MP3...</div>';
+  try{
+    const voiceId=S.voiceId||'21m00Tcm4TlvDq8ikWAM';
+    const cleanText=voiceText.replace(/\[(thoughtful|serious|motivated|energetic|calm|curious)\]/gi,'').trim();
+    const r=await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+voiceId,{
+      method:'POST',headers:{'Content-Type':'application/json','xi-api-key':S.el},
+      body:JSON.stringify({text:cleanText,model_id:'eleven_multilingual_v2',voice_settings:{stability:0.5,similarity_boost:0.75}})
+    });
+    if(!r.ok){const err=await r.json();throw new Error(err.detail?.message||'ElevenLabs Fehler');}
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    resultEl.innerHTML='<div style="background:var(--surface);border:1px solid var(--green);border-radius:4px;padding:10px;margin-top:6px"><div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-bottom:6px">MP3 FERTIG</div><audio controls style="width:100%;margin-bottom:8px"><source src="'+url+'" type="audio/mpeg"></audio><a href="'+url+'" download="voiceover.mp3" class="btn btn-red" style="font-size:11px;text-decoration:none;display:inline-block">MP3 herunterladen</a></div>';
+    addNotif('ElevenLabs','Voiceover MP3 fertig','green');
+  }catch(e){
+    resultEl.innerHTML='<div class="alert alert-red"><span>Fehler: '+e.message+'</span></div>';
+  }
+}
+async function genBildprompts(){
+  const topic=document.getElementById('plat-topic').value.trim()||currentPlatData.topic||'';
+  const kanal=document.getElementById('plat-kanal')?.value||'The Silent Grind';
+  const clipLen=parseInt(document.getElementById('plat-clip-len')?.value||'8');
+  const styleLock=getStyleLock();
+  const targetMins=parseInt(document.getElementById('plat-target-mins')?.value||'3');
+  const numPrompts=Math.ceil((targetMins*60)/clipLen);
+  if(!topic){alert('Thema eingeben');return;}
+  setStat('GENERIERT PROMPTS...');
+  document.getElementById('plat-results').style.display='block';
+  setPlatTab('yt');
+  const infoEl=document.getElementById('yt-prompts-info');
+  const promptsEl=document.getElementById('yt-prompts');
+  if(infoEl) infoEl.textContent=numPrompts+' Prompts x '+clipLen+' Sek = '+Math.round(numPrompts*clipLen/60)+' Min | Klick zum Kopieren';
+  promptsEl.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Generiere '+numPrompts+' Bildprompts in Batches...</div>';
+
+  // Split into batches of 5-6 to avoid JSON errors
+  const batchSize=5;
+  const allPrompts=[];
+  const totalBatches=Math.ceil(numPrompts/batchSize);
+
+  for(var batch=0;batch<totalBatches;batch++){
+    var startScene=batch*batchSize+1;
+    var endScene=Math.min((batch+1)*batchSize,numPrompts);
+    var batchCount=endScene-startScene+1;
+    var startSec=(startScene-1)*clipLen;
+    var endSec=endScene*clipLen;
+
+    promptsEl.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Batch '+(batch+1)+'/'+totalBatches+' (Szenen '+startScene+'-'+endScene+')...</div>';
+
+    var raw=await claude(
+      'Create EXACTLY '+batchCount+' image prompts for scenes '+startScene+' to '+endScene+' of a YouTube video.\nVideo: "'+topic+'" for "'+kanal+'"\nStyle lock (apply to ALL): '+styleLock+'\nEach scene: '+clipLen+' seconds\nTime range: '+startSec+'s to '+endSec+'s\n\nReturn ONLY a JSON array, no other text:\n[{"scene":'+startScene+',"timestamp":"'+formatTime(startSec)+'-'+formatTime(startSec+clipLen)+'","visual":"what you see","prompt":"full cinematic English prompt + style lock","mood":"one word"},...]',
+      'Video Director. Return ONLY a JSON array starting with [ and ending with ]. No markdown, no explanation.'
+    );
+
+    // Parse with fallback
+    try{
+      var cleaned=raw.trim();
+      // Extract JSON array
+      var arrStart=cleaned.indexOf('[');
+      var arrEnd=cleaned.lastIndexOf(']');
+      if(arrStart!==-1&&arrEnd!==-1){
+        var jsonStr=cleaned.substring(arrStart,arrEnd+1);
+        var parsed=JSON.parse(jsonStr);
+        allPrompts.push(...parsed);
+      }
+    }catch(e){
+      console.warn('Batch '+batch+' parse error:',e.message);
+      // Add placeholder
+      for(var pi=startScene;pi<=endScene;pi++){
+        allPrompts.push({
+          scene:pi,
+          timestamp:formatTime((pi-1)*clipLen)+'-'+formatTime(pi*clipLen),
+          visual:'Scene '+pi,
+          prompt:'Dark cinematic scene '+pi+', '+topic+', '+styleLock,
+          mood:'cinematic'
+        });
+      }
+    }
+
+    // Small delay between batches
+    if(batch<totalBatches-1) await new Promise(r=>setTimeout(r,500));
+  }
+
+  // Display all prompts
+  if(allPrompts.length>0){
+    promptsEl.innerHTML=
+      '<div style="background:var(--surface);border:1px solid var(--yellow);border-radius:4px;padding:8px;margin-bottom:10px;font-size:11px">'+
+      '<span style="color:var(--yellow)">🎨 STYLE LOCK</span> — '+styleLock.substring(0,80)+'...</div>'+
+      allPrompts.map(function(p,i){
+        var scene=p.scene||i+1;
+        var ts=p.timestamp||'';
+        var mood=p.mood||'';
+        var visual=p.visual||'';
+        var prompt=p.prompt||'';
+        var safePrompt=prompt.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        var klingBtn=(S.kling&&S.klingSecret)?
+          '<button class="btn btn-red" style="font-size:9px;padding:3px 8px" onclick="genKlingVideo(this,\''+safePrompt+'\','+i+','+clipLen+')">🎬 Kling</button>':
+          '<span style="font-size:9px;color:var(--muted)">Kling Keys → Setup</span>';
+        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px">'+
+          '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
+          '<span style="font-family:var(--mono);font-size:10px;color:var(--red)">SCENE '+scene+' ['+ts+'] '+clipLen+'s</span>'+
+          '<span style="font-size:10px;color:var(--muted)">'+mood+'</span></div>'+
+          '<div style="font-size:11px;color:#aaa;margin-bottom:4px">'+visual+'</div>'+
+          '<div style="background:#0D0D0D;border-left:3px solid var(--green);padding:8px;font-family:var(--mono);font-size:10px;color:#ccc;cursor:pointer;border-radius:0 3px 3px 0;line-height:1.5;margin-bottom:6px" onclick="navigator.clipboard.writeText(this.textContent);this.style.borderLeftColor=\'var(--yellow)\';setTimeout(()=>this.style.borderLeftColor=\'var(--green)\',1500)">'+prompt+'</div>'+
+          '<div style="display:flex;gap:6px;align-items:center">'+klingBtn+
+          '<div id="kling-result-'+i+'" style="font-size:10px;color:var(--green);margin-left:8px"></div>'+
+          '</div></div>';
+      }).join('');
+    addNotif('Bildprompts',allPrompts.length+' Prompts x '+clipLen+'s — Style Lock aktiv','green');
+  }else{
+    promptsEl.innerHTML='<div class="alert alert-red"><span>❌</span><span>Fehler — bitte nochmal versuchen</span></div>';
+  }
+  setStat('AKTIV');
+}
+
+function formatTime(secs){
+  var m=Math.floor(secs/60);
+  var s=secs%60;
+  return m+':'+(s<10?'0':'')+s;
 }
 
 async function checkCompetitors(){
   const topic=document.getElementById('plat-topic').value.trim();
   if(!topic){alert('Thema eingeben');return;}
   const el=document.getElementById('comp-result');
-  el.style.display='block';el.textContent='Analysiere Konkurrenz...';el.className='ai-box loading';
+  el.style.display='block';el.textContent='Checking competitors...';el.className='ai-box loading';
   const r=await claude(
-    'YouTube Konkurrenz-Analyse für Nische "Motivation/Disziplin/Self-Improvement".\nThema: "'+topic+'"\n\nPrüfe:\n1. Ist dieses Thema gerade übersättigt? (0-10)\n2. Welche Kanäle haben es zuletzt gemacht?\n3. Welchen einzigartigen Winkel sollte der Creator nehmen?\n4. Ist das Timing gut (trending/stabil/rückläufig)?\n\nAuf Deutsch, direkt und konkret.',
-    'YouTube Marktanalyse Experte.'
+    'YouTube competitor analysis for Motivation/Discipline niche.\nTopic: "'+topic+'"\n\n1. Oversaturation (0-10)?\n2. Which channels covered it recently and what angle did they use?\n3. What UNIQUE angle should this creator take to stand out?\n4. What should the script AVOID that others already do?\n5. Good timing?\n\nBe specific. The goal is to make this script sound different from everyone else.',
+    'YouTube Market Expert. Focus on differentiation and unique angles.'
   );
   el.className='ai-box';el.textContent=r;
+  localStorage.setItem('cos_comp_analysis', r);
+  addNotif('Konkurrenz gecheckt','Wird beim nächsten Script automatisch berücksichtigt','green');
 }
 
+function getCompAnalysis(){
+  const saved=localStorage.getItem('cos_comp_analysis');
+  if(!saved) return '';
+  return '\n\nCOMPETITOR ANALYSIS — use this to differentiate the script from existing content:\n'+saved.substring(0,600);
+}
 async function runPlatformEngine(){
   const topic=document.getElementById('plat-topic').value.trim();
-  const kanal=document.getElementById('plat-kanal').value||'The Silent Grind';
-  const lang=document.getElementById('plat-lang').value;
-  const doYT=document.getElementById('plat-yt').checked;
-  const doShorts=document.getElementById('plat-shorts').checked;
-  const doTT=document.getElementById('plat-tiktok').checked;
-  const doIG=document.getElementById('plat-ig').checked;
+  const kanal=document.getElementById('plat-kanal')?.value||'The Silent Grind';
+  const lang=document.getElementById('plat-lang')?.value||'en';
+  const doYT=document.getElementById('plat-yt')?.checked;
+  const doShorts=document.getElementById('plat-shorts')?.checked;
+  const doTT=document.getElementById('plat-tiktok')?.checked;
+  const doIG=document.getElementById('plat-ig')?.checked;
   if(!topic){alert('Thema eingeben');return;}
-
   setStat('GENERIERT...');
   document.getElementById('plat-results').style.display='block';
   setPlatTab('yt');
-
-  const dnaCtx=getDNAPrompt();
-  const profilCtx=getProfilContext();
-  const langInstr=lang==='de'?'Auf Deutsch.':lang==='both'?'Auf Englisch (Hauptversion) und Deutsch (zweite Version).':'In English.';
-
-  // YouTube Script
+  currentPlatData={topic,kanal};
+  const dna=getDNAPrompt();
+  const prof=getProfilContext();
+  const comp=getCompAnalysis();
+  const langStr=lang==='de'?'Write in German.':lang==='both'?'Write in English (main) and German (second).':'Write in English.';
+  const voiceTags='Use ONLY English emotion tags: [thoughtful], [serious], [motivated], [energetic], [calm]. CAPS for emphasis. ... for pauses. No German words in tags.';
   if(doYT){
-    document.getElementById('yt-script').textContent='Generiere...';
-    document.getElementById('yt-voice').textContent='Generiere...';
-
-    const ytScript=await claude(
-      'Schreibe ein YouTube Script für Kanal "'+kanal+'".\nThema: "'+topic+'"\nLänge: 4:45-5:00 Minuten (ca. 700-750 Wörter gesprochen).\n'+langInstr+'\n\nFormat:\n[0:00-0:08] HOOK: ...\n[0:08-0:30] Setup: ...\n[0:30-1:30] Punkt 1: ...\n[1:30-2:30] Punkt 2: ...\n[2:30-3:30] Punkt 3: ...\n[3:30-4:30] Wendepunkt: ...\n[4:30-5:00] CTA: ...\n\nJede Szene bekommt einen Zeitstempel. Das Script ist direkt als Voiceover lesbar.'+dnaCtx+profilCtx,
-      'Du bist der Ghostwriter von "'+kanal+'". Scripts klingen immer nach dem Creator, nie nach KI. Motivierend, direkt, keine Floskeln.'
-    );
-    document.getElementById('yt-script').textContent=ytScript;
-
-    const ytVoice=await claude(
-      'Konvertiere dieses Script für ElevenLabs:\n\n'+ytScript+'\n\nRegeln:\n- Punkte [...] für Pausen (länger = mehr Punkte)\n- CAPS für Betonung\n- [nachdenklich], [ernst], [motivierend] für Emotion\n- Keine Zeitstempel — nur den gesprochenen Text\n- Fließend, nicht abgehackt',
-      'ElevenLabs Voice Script Experte.'
-    );
-    document.getElementById('yt-voice').textContent=ytVoice;
-
-    // YouTube SEO
-    const ytSEO=await claudeJSON(
-      'YouTube SEO-Paket für:\nKanal: "'+kanal+'"\nThema: "'+topic+'"\nNische: Motivation/Disziplin\n\nNUR JSON:\n{"title":"Klickstarker Titel unter 60 Zeichen","title_alt":"Alternative Version","description":"YouTube Description 150-200 Wörter mit Keywords","tags":["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8","tag9","tag10"],"thumbnail_text":"3-5 Wörter für Thumbnail Text","hook_text":"Erste 2 Sätze für YouTube Preview"}',
-      'YouTube SEO Experte. NUR JSON.'
-    );
-    if(ytSEO){
-      document.getElementById('yt-seo').innerHTML=
-        '<div style="margin-bottom:8px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">TITEL</div><div style="font-size:13px;font-weight:700;padding:6px;background:var(--surface);border-radius:3px;margin-top:3px">'+ytSEO.title+'</div></div>'+
-        '<div style="margin-bottom:8px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">THUMBNAIL TEXT</div><div style="font-size:13px;font-weight:700;color:var(--red);padding:6px;background:var(--surface);border-radius:3px;margin-top:3px">'+ytSEO.thumbnail_text+'</div></div>'+
-        '<div style="margin-bottom:8px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">TAGS</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">'+
-        (ytSEO.tags||[]).map(t=>'<span class="badge b-blue" style="cursor:pointer" onclick="navigator.clipboard.writeText(\''+t+'\')">'+t+'</span>').join('')+'</div></div>'+
-        '<div><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">DESCRIPTION PREVIEW</div><div style="font-size:11px;color:#aaa;padding:6px;background:var(--surface);border-radius:3px;margin-top:3px">'+((ytSEO.description||'').substring(0,150))+'...</div></div>';
-    }
-
-    // Bildprompts YouTube
-    const ytPrompts=await claudeJSON(
-      'Erstelle 15 Bildprompts für Kling AI / Google Flow.\nVideo: "'+topic+'" für Kanal "'+kanal+'"\nStil: Cinematic, dark aesthetic, motivational, faceless\nJede Szene ca. 18-20 Sekunden bei 5 Min Video.\n\nNUR JSON:\n{"prompts":[{"scene":1,"timestamp":"0:00-0:20","visual":"Was man sieht","prompt":"Vollständiger Kling/Flow Prompt auf Englisch","mood":"Stimmung"},{"scene":2,...}]}',
-      'Video Director. NUR JSON. Prompts auf Englisch für KI-Video-Tools.'
-    );
-    if(ytPrompts&&ytPrompts.prompts){
-      document.getElementById('yt-prompts').innerHTML=ytPrompts.prompts.map(p=>
-        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:8px">'+
-        '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'+
-        '<span style="font-family:var(--mono);font-size:10px;color:var(--red)">SZENE '+p.scene+' ['+p.timestamp+']</span>'+
-        '<span style="font-size:10px;color:var(--muted)">'+p.mood+'</span></div>'+
-        '<div style="font-size:11px;color:#aaa;margin-bottom:6px">'+p.visual+'</div>'+
-        '<div style="background:#0D0D0D;border-left:3px solid var(--green);padding:8px;font-family:var(--mono);font-size:10px;color:#aaa;cursor:pointer;border-radius:0 3px 3px 0" onclick="navigator.clipboard.writeText(this.textContent)">'+p.prompt+'</div>'+
-        '</div>'
-      ).join('');
+    document.getElementById('yt-script').textContent='Generating...';
+    document.getElementById('yt-voice').textContent='Generating...';
+    const script=await aiCall('Write YouTube script for "'+kanal+'".\nTopic: "'+topic+'"\nLength: 3-5 min (~500-750 words).\n'+langStr+'\n\nTimestamped:\n[0:00-0:08] HOOK\n[0:08-0:30] SETUP\n[0:30-1:30] POINT 1\n[1:30-2:30] POINT 2\n[2:30-3:30] POINT 3\n[3:30-4:30] THE TURN\n[4:30-5:00] CTA\n\nEnd with word count and runtime.'+dna+prof+comp,'Ghostwriter for "'+kanal+'". Never sounds like AI. Direct, motivating. MUST differentiate from competitors.');
+    document.getElementById('yt-script').textContent=script;
+    const voice=await aiCall('Convert for ElevenLabs:\n\n'+script+'\n\n'+voiceTags+'\nNo timestamps. Flowing.','ElevenLabs Expert. English tags only.');
+    document.getElementById('yt-voice').textContent=voice;
+    if(S.el) document.getElementById('el-direct').style.display='block';
+    const seo=await claudeJSON('YouTube SEO for "'+kanal+'", topic "'+topic+'".\nJSON ONLY:\n{"title":"under 60 chars","description_full":"200 words with keywords","tags":["t1","t2","t3","t4","t5","t6","t7","t8","t9","t10"],"thumbnail_text":"3-5 words"}','YouTube SEO Expert. JSON ONLY.');
+    if(seo){
+      var seoHTML='<div style="margin-bottom:8px"><b>TITLE</b><br><div style="padding:6px;background:var(--surface);border-radius:3px;cursor:pointer;font-weight:700" onclick="navigator.clipboard.writeText(this.textContent)">'+seo.title+'</div></div>';
+      seoHTML+='<div style="margin-bottom:8px"><b>THUMBNAIL</b><br><div style="padding:6px;background:var(--surface);border-radius:3px;color:var(--red);font-weight:700">'+seo.thumbnail_text+'</div></div>';
+      seoHTML+='<div style="margin-bottom:8px"><b>TAGS</b><br><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">'+(seo.tags||[]).map(function(t){return '<span class="badge b-blue" style="cursor:pointer" onclick="navigator.clipboard.writeText(this.textContent)">'+t+'</span>';}).join('')+'</div></div>';
+      seoHTML+='<div><b>DESCRIPTION</b><br><div style="font-size:11px;color:#aaa;padding:6px;background:var(--surface);border-radius:3px;cursor:pointer;max-height:80px;overflow-y:auto" onclick="navigator.clipboard.writeText(this.textContent)">'+(seo.description_full||seo.description||'')+'</div></div>';
+      document.getElementById('yt-seo').innerHTML=seoHTML;
     }
   }
-
-  // Shorts
   if(doShorts){
-    const shortsScript=await claude(
-      'YouTube Shorts Script für "'+kanal+'".\nThema: "'+topic+'"\nLänge: genau 60 Sekunden (ca. 150 Wörter)\n'+langInstr+'\n\nFormat:\n[0:00-0:03] HOOK (Schock/Frage)\n[0:03-0:50] Kern-Message (5 kurze Punkte)\n[0:50-0:60] CTA\n\nSchnell, energetisch, kein Intro.'+dnaCtx,
-      'Shorts Script Experte. Direkt, energetisch, kein Wort verschwendet.'
-    );
-    document.getElementById('shorts-script').textContent=shortsScript;
-    const shortsVoice=await claude('ElevenLabs Format für dieses Shorts Script:\n\n'+shortsScript+'\n\nSehr schnelles Pacing. CAPS für Energie. Wenig Pausen.','ElevenLabs Experte.');
-    document.getElementById('shorts-voice').textContent=shortsVoice;
-    const shortsP=await claudeJSON('5 Bildprompts für YouTube Shorts (9:16 Format).\nThema: "'+topic+'"\nStil: Dark, cinematic, motivational\nNUR JSON:\n{"prompts":[{"scene":1,"prompt":"Kling prompt englisch","seconds":12}]}','NUR JSON.');
-    if(shortsP&&shortsP.prompts){
-      document.getElementById('shorts-prompts').innerHTML=shortsP.prompts.map(p=>
-        '<div style="background:var(--surface);border-left:3px solid var(--blue);padding:8px;margin-bottom:6px;font-family:var(--mono);font-size:10px;cursor:pointer" onclick="navigator.clipboard.writeText(this.textContent)">'+p.prompt+'</div>'
-      ).join('');
-    }
+    const ss=await aiCall('YouTube Shorts for "'+kanal+'". Topic: "'+topic+'". 60s, ~150w.\n'+langStr+'\n[0:00-0:03] HOOK\n[0:03-0:50] 3 points\n[0:50-0:60] CTA'+dna,'Shorts Expert.');
+    document.getElementById('shorts-script').textContent=ss;
+    const sv=await aiCall('ElevenLabs format:\n\n'+ss+'\n\n'+voiceTags,'ElevenLabs Expert.');
+    document.getElementById('shorts-voice').textContent=sv;
+    const sp=await claudeJSON('5 image prompts for Shorts 9:16. Topic: "'+topic+'". JSON:\n{"prompts":[{"scene":1,"prompt":"cinematic english","seconds":12}]}','JSON ONLY.');
+    if(sp&&sp.prompts) document.getElementById('shorts-prompts').innerHTML=sp.prompts.map(function(p){return '<div style="background:var(--surface);border-left:3px solid var(--blue);padding:8px;margin-bottom:6px;font-family:var(--mono);font-size:10px;cursor:pointer" onclick="navigator.clipboard.writeText(this.textContent)">'+p.prompt+'</div>';}).join('');
   }
-
-  // TikTok
   if(doTT){
-    const ttScript=await claude('TikTok Script für "'+kanal+'".\nThema: "'+topic+'"\nLänge: 45 Sekunden\nTikTok-Sprache: direkt, trendig, hook in ersten 2 Sekunden.\n'+langInstr+dnaCtx,'TikTok Script Experte.');
-    document.getElementById('tt-script').textContent=ttScript;
-    const ttSEO=await claudeJSON('TikTok SEO für "'+topic+'".\nNUR JSON:\n{"caption":"Caption unter 150 Zeichen","hashtags":["#tag1","#tag2","#tag3","#tag4","#tag5"],"sound_suggestion":"Trending Sound Typ"}','NUR JSON.');
-    if(ttSEO){
-      document.getElementById('tt-seo').innerHTML=
-        '<div style="margin-bottom:8px"><div style="font-size:12px;padding:6px;background:var(--surface);border-radius:3px">'+ttSEO.caption+'</div></div>'+
-        '<div style="display:flex;flex-wrap:wrap;gap:4px">'+
-        (ttSEO.hashtags||[]).map(h=>'<span class="badge b-blue">'+h+'</span>').join('')+'</div>';
-    }
+    const ts=await aiCall('TikTok script for "'+kanal+'". Topic: "'+topic+'". 45s. Hook in 2s.\n'+langStr+dna,'TikTok Expert.');
+    document.getElementById('tt-script').textContent=ts;
+    const tseo=await claudeJSON('TikTok for "'+topic+'".\nJSON:\n{"caption":"under 150","hashtags":["#t1","#t2","#t3","#t4","#t5"]}','JSON ONLY.');
+    if(tseo) document.getElementById('tt-seo').innerHTML='<div style="margin-bottom:8px;font-size:12px;padding:6px;background:var(--surface);border-radius:3px">'+tseo.caption+'</div><div style="display:flex;flex-wrap:wrap;gap:4px">'+(tseo.hashtags||[]).map(function(h){return '<span class="badge b-blue">'+h+'</span>';}).join('')+'</div>';
   }
-
-  // Instagram
   if(doIG){
-    const igScript=await claude('Instagram Reel Script für "'+kanal+'".\nThema: "'+topic+'"\nLänge: 20 Sekunden (ca. 50 Wörter)\nVisuell stark, erster Frame muss stoppen.\n'+langInstr+dnaCtx,'Instagram Reel Experte.');
-    document.getElementById('ig-script').textContent=igScript;
-    const igSEO=await claudeJSON('Instagram Caption + Hashtags für "'+topic+'".\nNUR JSON:\n{"caption":"Caption mit Emoji, 100-150 Zeichen","hashtags":["#tag1","#tag2","#tag3","#tag4","#tag5","#tag6","#tag7","#tag8","#tag9","#tag10"]}','NUR JSON.');
-    if(igSEO){
-      document.getElementById('ig-seo').innerHTML=
-        '<div style="margin-bottom:8px;font-size:12px;padding:6px;background:var(--surface);border-radius:3px">'+igSEO.caption+'</div>'+
-        '<div style="display:flex;flex-wrap:wrap;gap:4px">'+
-        (igSEO.hashtags||[]).map(h=>'<span class="badge b-blue" style="font-size:9px">'+h+'</span>').join('')+'</div>';
-    }
+    const is=await aiCall('Instagram Reel for "'+kanal+'". Topic: "'+topic+'". 20s.\n'+langStr+dna,'Instagram Expert.');
+    document.getElementById('ig-script').textContent=is;
+    const iseo=await claudeJSON('Instagram for "'+topic+'".\nJSON:\n{"caption":"emoji, 100-150","hashtags":["#t1","#t2","#t3","#t4","#t5","#t6","#t7","#t8","#t9","#t10"]}','JSON ONLY.');
+    if(iseo) document.getElementById('ig-seo').innerHTML='<div style="margin-bottom:8px;font-size:12px;padding:6px;background:var(--surface);border-radius:3px">'+iseo.caption+'</div><div style="display:flex;flex-wrap:wrap;gap:4px">'+(iseo.hashtags||[]).map(function(h){return '<span class="badge b-blue" style="font-size:9px">'+h+'</span>';}).join('')+'</div>';
   }
-
-  // Thumbnail
-  const thumb=await claude('Erstelle einen DALL-E/Canva Prompt für ein YouTube Thumbnail.\nVideo: "'+topic+'" Kanal: "'+kanal+'"\nStil: Dark, bold, minimalistisch, roter Akzent\nText auf Thumbnail: max 5 Wörter, muss auf Handy lesbar sein\nAuf Englisch, direkt als Prompt formuliert.','Thumbnail Designer.');
+  const thumb=await claude('DALL-E/Canva YouTube thumbnail prompt.\nVideo: "'+topic+'" Channel: "'+kanal+'"\nDark, bold, minimal, red accent. Max 5 words. Mobile readable.','Thumbnail Designer.');
   document.getElementById('plat-thumb').textContent=thumb;
-
-  // Slop Check
-  const slopCheck=await claudeJSON('Schneller Slop-Check für diesen Content:\nKanal: "'+kanal+'", Thema: "'+topic+'"\nNUR JSON:\n{"score":8,"verdict":"SICHER","reason":"2 Sätze warum","tip":"1 konkreter Tipp"}','Slop Checker. NUR JSON.');
-  if(slopCheck){
-    const color=slopCheck.verdict==='SICHER'?'var(--green)':'var(--yellow)';
-    document.getElementById('plat-slop').innerHTML=
-      '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface);border-radius:4px">'+
-      '<span style="font-size:24px">'+(slopCheck.verdict==='SICHER'?'🟢':'🟡')+'</span>'+
-      '<div><div style="font-weight:700;color:'+color+'">'+slopCheck.verdict+' ('+slopCheck.score+'/10)</div>'+
-      '<div style="font-size:12px;color:#aaa;margin-top:2px">'+slopCheck.reason+'</div>'+
-      '<div style="font-size:11px;color:var(--yellow);margin-top:4px">💡 '+slopCheck.tip+'</div></div></div>';
+  const sc=await claudeJSON('Slop check. Channel: "'+kanal+'", Topic: "'+topic+'".\nJSON:\n{"score":8,"verdict":"SAFE","reason":"2 sentences","tip":"1 tip"}','JSON ONLY.');
+  if(sc){
+    var col=sc.verdict==='SAFE'?'var(--green)':'var(--yellow)';
+    document.getElementById('plat-slop').innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface);border-radius:4px"><span style="font-size:24px">'+(sc.verdict==='SAFE'?'🟢':'🟡')+'</span><div><div style="font-weight:700;color:'+col+'">'+sc.verdict+' ('+sc.score+'/10)</div><div style="font-size:12px;color:#aaa;margin-top:2px">'+sc.reason+'</div><div style="font-size:11px;color:var(--yellow);margin-top:4px">'+sc.tip+'</div></div></div>';
   }
+  platHistory.unshift({topic,kanal,date:new Date().toLocaleDateString('de-DE'),preview:(document.getElementById('yt-script').textContent||'').substring(0,80)});
+  if(platHistory.length>10) platHistory=platHistory.slice(0,10);
+  localStorage.setItem('cos_plat_history',JSON.stringify(platHistory));
+  renderPlatHistory();
+  addNotif('Plattform-Engine','"'+topic+'" fertig','green');
+  setStat('AKTIV');
+}
+function updatePromptsPreview(){
+  var clipLen=parseInt(document.getElementById('plat-clip-len')?.value||'8');
+  var mins=parseInt(document.getElementById('plat-target-mins')?.value||'3');
+  var num=Math.ceil((mins*60)/clipLen);
+  var el=document.getElementById('prompts-preview');
+  if(el) el.textContent=num+' Prompts × '+clipLen+'s = '+mins+' Min';
+}
 
-  addNotif('Plattform-Engine','Content-Paket für "'+topic+'" fertig','green');
+function renderPlatHistory(){
+  var el=document.getElementById('plat-history-btns');if(!el)return;
+  if(!platHistory||platHistory.length===0){
+    el.innerHTML='<span style="font-size:9px;color:var(--muted)">Noch kein Verlauf</span>';
+    return;
+  }
+  el.innerHTML=platHistory.slice(0,5).map(function(h,i){
+    return '<button class="btn btn-outline" style="font-size:9px;padding:3px 8px;cursor:pointer" onclick="loadPlatHistory('+i+')">'+h.date+' · '+h.topic.substring(0,15)+'...</button>';
+  }).join('');
+}
+function loadPlatHistory(i){
+  var h=platHistory[i];if(!h)return;
+  document.getElementById('plat-topic').value=h.topic;
+  if(h.kanal) document.getElementById('plat-kanal').value=h.kanal;
+  addNotif('Verlauf','Thema "'+h.topic+'" geladen — jetzt Bildprompts generieren','blue');
+  // Scroll to generate button
+  document.getElementById('plat-topic').scrollIntoView({behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════
+// STYLE LOCK
+// ═══════════════════════════════════════
+const STYLE_PRESETS = {
+  silent_grind: 'dark cinematic aesthetic, deep shadows, high contrast, muted desaturated colors with subtle red accents, no human faces, urban minimalist environment, foggy atmospheric haze, 35mm film grain, moody noir lighting, slow motion feel, professional color grading',
+  documentary: 'clean documentary style, natural lighting, neutral colors, professional corporate aesthetic, sharp focus, minimal shadows, no faces, modern office or urban setting',
+  lofi: 'warm vintage aesthetic, soft grain, muted warm tones, nostalgic 90s feel, cozy indoor lighting, analog film look, soft focus edges',
+  tech: 'futuristic tech aesthetic, deep blue and cyan tones, neon accents, dark background, holographic elements, clean geometric shapes, no faces',
+  nature: 'organic natural aesthetic, soft green and earth tones, gentle lighting, peaceful outdoor environment, minimal motion, cinematic nature photography'
+};
+
+let styleRefData = null;
+
+function applyStylePreset(){
+  const preset = document.getElementById('style-lock-preset')?.value;
+  if(preset && preset !== 'custom' && STYLE_PRESETS[preset]){
+    document.getElementById('style-lock-text').value = STYLE_PRESETS[preset];
+    localStorage.setItem('cos_style_lock', STYLE_PRESETS[preset]);
+  }
+}
+
+function resetStyleLock(){
+  document.getElementById('style-lock-preset').value = 'silent_grind';
+  document.getElementById('style-lock-text').value = STYLE_PRESETS.silent_grind;
+  localStorage.setItem('cos_style_lock', STYLE_PRESETS.silent_grind);
+}
+
+function getStyleLock(){
+  return document.getElementById('style-lock-text')?.value || STYLE_PRESETS.silent_grind;
+}
+
+function handleStyleRefDrop(e){
+  e.preventDefault();
+  if(e.dataTransfer.files[0]) processStyleRefFile(e.dataTransfer.files[0]);
+}
+function handleStyleRefFile(e){
+  if(e.target.files[0]) processStyleRefFile(e.target.files[0]);
+}
+function processStyleRefFile(f){
+  const r = new FileReader();
+  r.onload = e => {
+    styleRefData = {data: e.target.result.split(',')[1], type: f.type};
+    document.getElementById('style-ref-preview').innerHTML =
+      '<img src="'+e.target.result+'" style="max-height:50px;border-radius:3px"> <span style="color:var(--green);font-size:10px">✓ '+f.name+'</span>';
+    addNotif('Referenzbild','Wird bei allen Bildprompts als Stil-Anker genutzt','green');
+  };
+  r.readAsDataURL(f);
+}
+function clearStyleRef(){
+  styleRefData = null;
+  document.getElementById('style-ref-preview').innerHTML = 'Referenzbild hier ablegen oder klicken';
+  document.getElementById('style-ref-input').value = '';
+}
+
+// Load saved style lock
+window.addEventListener('load', function(){
+  const saved = localStorage.getItem('cos_style_lock');
+  if(saved) document.getElementById('style-lock-text').value = saved;
+  else applyStylePreset();
+});
+
+// ═══════════════════════════════════════
+// BILDPROMPTS — MIT STYLE LOCK
+// ═══════════════════════════════════════
+async function genBildprompts(){
+  const topic=document.getElementById('plat-topic').value.trim()||currentPlatData.topic||'';
+  const kanal=document.getElementById('plat-kanal')?.value||'The Silent Grind';
+  const clipLen=parseInt(document.getElementById('plat-clip-len')?.value||'8');
+  const targetMins=parseInt(document.getElementById('plat-target-mins')?.value||'3');
+  const numPrompts=Math.ceil((targetMins*60)/clipLen);
+  const styleLock=getStyleLock();
+  const creativity=document.getElementById('kling-creativity')?.value||'0.5';
+  if(!topic){alert('Thema eingeben');return;}
+  
+  localStorage.setItem('cos_style_lock', styleLock);
+  setStat('GENERIERT PROMPTS...');
+  document.getElementById('plat-results').style.display='block';
+  setPlatTab('yt');
+  const infoEl=document.getElementById('yt-prompts-info');
+  const promptsEl=document.getElementById('yt-prompts');
+  if(infoEl) infoEl.textContent=numPrompts+' Prompts × '+clipLen+' Sek = '+Math.round(numPrompts*clipLen/60)+' Min | Kling Creativity: '+creativity+' | Klick = Kopieren';
+  promptsEl.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Generiere '+numPrompts+' konsistente Bildprompts...</div>';
+
+  const refNote = styleRefData ? 'Use the reference image style as strict visual anchor for ALL scenes.' : '';
+
+  const j=await claudeJSON(
+    'Create EXACTLY '+numPrompts+' image prompts for Kling AI / Google Flow.\nVideo topic: "'+topic+'" for channel "'+kanal+'"\nEach clip: '+clipLen+' seconds\nTotal: '+Math.round(numPrompts*clipLen/60)+' minutes\n\nCRITICAL STYLE CONSISTENCY RULES:\n- EVERY prompt MUST end with this exact style lock: "'+styleLock+'"\n- Keep all scenes visually consistent — same color palette, same atmosphere\n- No faces, no text overlays in any scene\n- Progress through the video narrative naturally\n'+refNote+'\nKling creativity setting: '+creativity+' (lower = more consistent)\n\nJSON ONLY:\n{"prompts":[{"scene":1,"timestamp":"0:00-0:'+String(clipLen).padStart(2,'0')+'","visual":"What you see (English)","prompt":"Full cinematic prompt + STYLE LOCK appended","mood":"one word","flow_note":"For Google Flow: start from previous clip end frame"}]}',
+    'Video Director specializing in visual consistency. Every prompt must maintain the same aesthetic. JSON ONLY.'
+  );
+
+  if(j&&j.prompts&&j.prompts.length>0){
+    promptsEl.innerHTML=
+      '<div style="background:var(--surface);border:1px solid var(--yellow);border-radius:4px;padding:8px;margin-bottom:10px;font-size:11px">'+
+      '<span style="color:var(--yellow)">🎨 STYLE LOCK AKTIV</span> — '+styleLock.substring(0,80)+'...</div>'+
+      j.prompts.map(function(p,i){
+        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px">'+
+          '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
+          '<span style="font-family:var(--mono);font-size:10px;color:var(--red)">SCENE '+(p.scene||i+1)+' ['+(p.timestamp||'')+'] · '+clipLen+'s</span>'+
+          '<span style="font-size:10px;color:var(--muted)">'+(p.mood||'')+'</span></div>'+
+          '<div style="font-size:11px;color:#aaa;margin-bottom:4px">'+(p.visual||'')+'</div>'+
+          (p.flow_note?'<div style="font-size:10px;color:var(--blue);margin-bottom:4px">Flow: '+p.flow_note+'</div>':'')+
+          '<div style="background:#0D0D0D;border-left:3px solid var(--green);padding:8px;font-family:var(--mono);font-size:10px;color:#ccc;cursor:pointer;border-radius:0 3px 3px 0;line-height:1.5" onclick="navigator.clipboard.writeText(this.textContent);this.style.borderLeftColor=\'var(--yellow)\';setTimeout(()=>this.style.borderLeftColor=\'var(--green)\',1500)">'+(p.prompt||'')+'</div>'+
+        '</div>';
+      }).join('');
+    addNotif('Bildprompts',j.prompts.length+' konsistente Prompts × '+clipLen+'s — Style Lock aktiv','green');
+  }else{
+    promptsEl.innerHTML='<div class="alert alert-red"><span>❌</span><span>Fehler — nochmal versuchen</span></div>';
+  }
+  setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// KLING VIDEO GENERIERUNG
+// ═══════════════════════════════════════
+async function genKlingVideo(btn, prompt, idx, duration){
+  if(!S.kling||!S.klingSecret){alert('Kling Access Key + Secret Key im Setup eingeben');return;}
+  var resultEl=document.getElementById('kling-result-'+idx);
+  if(!resultEl) return;
+  btn.disabled=true;
+  btn.textContent='⏳ Generiert...';
+  resultEl.textContent='';
+
+  try{
+    // Generate JWT token from Access + Secret Key
+    var now=Math.floor(Date.now()/1000);
+    var header=btoa(JSON.stringify({alg:'HS256',typ:'JWT'})).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+    var payload=btoa(JSON.stringify({iss:S.kling,exp:now+1800,nbf:now-5})).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+
+    // Create task
+    var r=await fetch('https://api.klingai.com/v1/videos/text2video',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+S.kling+':'+S.klingSecret
+      },
+      body:JSON.stringify({
+        model_name:'kling-v2-master',
+        prompt:prompt,
+        negative_prompt:'text, watermark, faces, people, low quality',
+        cfg_scale:parseFloat(document.getElementById('kling-creativity')?.value||'0.5'),
+        mode:'pro',
+        duration:String(duration),
+        aspect_ratio:'16:9'
+      })
+    });
+
+    var d=await r.json();
+
+    if(d.code!==0){
+      throw new Error(d.message||'Kling API Fehler: '+d.code);
+    }
+
+    var taskId=d.data?.task_id;
+    if(!taskId) throw new Error('Keine Task ID erhalten');
+
+    resultEl.textContent='⏳ Task ID: '+taskId+' — polling...';
+    btn.textContent='⏳ Warte auf Video...';
+
+    // Poll for result
+    var attempts=0;
+    var videoUrl=null;
+    while(attempts<30){
+      await new Promise(res=>setTimeout(res,5000));
+      attempts++;
+
+      var pollR=await fetch('https://api.klingai.com/v1/videos/text2video/'+taskId,{
+        headers:{'Authorization':'Bearer '+S.kling+':'+S.klingSecret}
+      });
+      var pollD=await pollR.json();
+      var status=pollD.data?.task_status;
+      resultEl.textContent='Status: '+status+' ('+attempts*5+'s)';
+
+      if(status==='succeed'){
+        videoUrl=pollD.data?.task_result?.videos?.[0]?.url;
+        break;
+      }
+      if(status==='failed'){
+        throw new Error('Kling Generierung fehlgeschlagen');
+      }
+    }
+
+    if(videoUrl){
+      resultEl.innerHTML='<a href="'+videoUrl+'" target="_blank" style="color:var(--green);text-decoration:none">✅ Video fertig — klicken zum öffnen</a> '+
+        '<a href="'+videoUrl+'" download="scene_'+idx+'.mp4" style="color:var(--blue);text-decoration:none;margin-left:8px">⬇️ Download</a>';
+      addNotif('Kling Video','Scene '+(idx+1)+' fertig generiert','green');
+    }else{
+      throw new Error('Timeout — kein Video erhalten');
+    }
+  }catch(e){
+    resultEl.innerHTML='<span style="color:var(--red)">❌ '+e.message+'</span>';
+    addNotif('Kling Fehler',e.message,'red');
+  }
+  btn.disabled=false;
+  btn.textContent='🎬 Kling Video';
+}
+
+// ═══════════════════════════════════════
+// ANTI-AI PATTERN FILTER
+// ═══════════════════════════════════════
+async function runAntiAIFilter(){
+  const script=document.getElementById('yt-script')?.textContent?.trim();
+  if(!script||script==='Generating...'){alert('Erst Script generieren');return;}
+  setStat('ANALYSIERT AI-MUSTER...');
+  document.getElementById('anti-ai-result').style.display='block';
+  document.getElementById('ai-fixed-script').className='ai-box loading';
+  document.getElementById('ai-fixed-script').textContent='Analysiere...';
+  const j=await claudeJSON(
+    'Detect AI-generated content patterns from Claude, GPT-4, and Gemini in this YouTube script:\n\n"""\n'+script.substring(0,2000)+'\n"""\n\nCommon AI patterns:\n- "In today\'s video", "Let\'s dive in", "Welcome back"\n- Numbered lists 1.2.3. that sound mechanical\n- "It\'s important to note", "This is crucial", "Game changer"\n- Overly smooth transitions\n- Generic motivational phrases\n- "At the end of the day", "Level up"\n- Starting with "So," or "Now,"\n\nJSON ONLY:\n{"patterns_found":["pattern1","pattern2"],"uniqueness_score":6,"uniqueness_label":"Moderate — needs work","total_patterns":3}',
+    'AI Pattern Detection Expert. JSON ONLY.'
+  );
+  if(j){
+    var scoreColor=j.uniqueness_score>=8?'var(--green)':j.uniqueness_score>=5?'var(--yellow)':'var(--red)';
+    document.getElementById('ai-unique-score').textContent=j.uniqueness_score+'/10';
+    document.getElementById('ai-unique-score').style.color=scoreColor;
+    document.getElementById('ai-unique-label').textContent=j.uniqueness_label||'';
+    document.getElementById('ai-patterns-found').innerHTML=(j.patterns_found||[]).map(function(p){
+      return '<div style="padding:3px 0;border-bottom:1px solid var(--border);display:flex;gap:6px;font-size:11px"><span style="color:var(--red)">✗</span>'+p+'</div>';
+    }).join('')||'<div style="color:var(--green);font-size:11px">Keine typischen AI-Muster gefunden</div>';
+  }
+  var kanal=document.getElementById('plat-kanal')?.value||'The Silent Grind';
+  var patternsStr=(j?.patterns_found||[]).join(', ');
+  var fixedScript=await claude(
+    'Rewrite this YouTube script to sound completely human and unique.\n\nOriginal:\n"""\n'+script.substring(0,2000)+'\n"""\n\nAI patterns to remove: '+patternsStr+'\n\nRules:\n1. Remove ALL AI patterns\n2. Use incomplete sentences occasionally\n3. Raw, direct personality — no corporate polish\n4. Break the perfect 1-2-3 structure\n5. Unexpected word choices\n6. Sound like a real person talking passionately\n7. Keep timestamps\n8. Same message, completely different voice\n\nDo NOT use common AI phrases. Sound human.',
+    'Expert editor removing AI patterns. Channel: "'+kanal+'". Human, unique, passionate.'
+  );
+  document.getElementById('ai-fixed-script').className='ai-box';
+  document.getElementById('ai-fixed-script').style.whiteSpace='pre-wrap';
+  document.getElementById('ai-fixed-script').textContent=fixedScript;
+  addNotif('Anti-AI Filter','Script optimiert — klingt jetzt nach dir','green');
+  setStat('AKTIV');
+}
+function applyFixedScript(){
+  var fixed=document.getElementById('ai-fixed-script')?.textContent;
+  if(!fixed) return;
+  // Update script
+  document.getElementById('yt-script').textContent=fixed;
+  // Also regenerate voiceover from fixed script
+  var voiceEl=document.getElementById('yt-voice');
+  if(voiceEl){
+    voiceEl.className='ai-box loading';
+    voiceEl.textContent='Voiceover wird angepasst...';
+    var voiceTags='Use ONLY English emotion tags: [thoughtful], [serious], [motivated], [energetic], [calm]. CAPS for emphasis. ... for pauses. No German words.';
+    claude(
+      'Convert this script for ElevenLabs voiceover:\n\n'+fixed+'\n\n'+voiceTags+'\nNo timestamps — spoken text only. Flowing.',
+      'ElevenLabs Expert. English emotion tags only.'
+    ).then(function(voice){
+      voiceEl.className='ai-box';
+      voiceEl.style.whiteSpace='pre-wrap';
+      voiceEl.textContent=voice;
+      addNotif('Script + Voiceover übernommen','Beide wurden aktualisiert','green');
+    });
+  }
+  document.getElementById('yt-script').scrollIntoView({behavior:'smooth'});
+}
+
+async function genMusicPrompt(){
+  const topic=document.getElementById('plat-topic').value.trim()||currentPlatData.topic||'motivation discipline';
+  const style=document.getElementById('music-style')?.value||'dark cinematic motivational';
+  const instrumental=document.getElementById('music-instrumental')?.value==='true';
+  setStat('MUSIK PROMPT...');
+  document.getElementById('music-prompt-box').style.display='block';
+  const promptEl=document.getElementById('music-suno-prompt');
+  promptEl.className='ai-box loading';promptEl.textContent='Generiere...';
+  const r=await claude(
+    'Create a detailed music prompt for Suno AI / Udio for a YouTube video.\nVideo topic: "'+topic+'"\nDesired style: '+style+'\nInstrumental: '+instrumental+'\n\nThe prompt should include:\n- Genre tags\n- BPM range\n- Instruments\n- Mood/atmosphere\n- Energy level\n- No/Yes vocals\n\nFormat: Ready to paste directly into Suno or Udio. In English. Max 200 characters for tags, then a description.',
+    'Music Prompt Expert for YouTube content creators.'
+  );
+  promptEl.className='ai-box';promptEl.style.whiteSpace='pre-wrap';promptEl.textContent=r;
+  addNotif('Musik Prompt','Für Suno AI und Udio bereit','yellow');
+  setStat('AKTIV');
+}
+
+async function genElevenLabsMusic(){
+  if(!S.el){alert('ElevenLabs API Key im Setup eingeben');return;}
+  const topic=document.getElementById('plat-topic').value.trim()||currentPlatData.topic||'motivation discipline';
+  const style=document.getElementById('music-style')?.value||'dark cinematic motivational';
+  const duration=parseInt(document.getElementById('music-duration')?.value||'60000');
+  const instrumental=document.getElementById('music-instrumental')?.value==='true';
+  const resultEl=document.getElementById('music-el-result');
+  resultEl.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>ElevenLabs Music generiert... (~30 Sek)</div>';
+  setStat('MUSIK GENERIERT...');
+  try{
+    const musicPrompt=style+', '+topic+' themed, cinematic, YouTube background music'+(instrumental?', instrumental, no vocals':', with subtle vocals');
+    const r=await fetch('https://api.elevenlabs.io/v1/music/stream',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','xi-api-key':S.el},
+      body:JSON.stringify({
+        prompt:musicPrompt,
+        duration_ms:duration,
+        output_format:'mp3_44100_128'
+      })
+    });
+    if(!r.ok){
+      const err=await r.text();
+      throw new Error('ElevenLabs Music: '+r.status+' — '+err.substring(0,100));
+    }
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const durSec=Math.round(duration/1000);
+    resultEl.innerHTML=
+      '<div style="background:var(--surface);border:1px solid var(--green);border-radius:4px;padding:10px;margin-top:8px">'+
+      '<div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-bottom:6px">✅ MUSIK FERTIG — '+durSec+' SEK · LIZENZFREI</div>'+
+      '<div style="font-size:11px;color:#aaa;margin-bottom:8px">'+musicPrompt+'</div>'+
+      '<audio controls style="width:100%;margin-bottom:8px"><source src="'+url+'" type="audio/mpeg"></audio>'+
+      '<a href="'+url+'" download="background_music.mp3" class="btn btn-red" style="font-size:11px;text-decoration:none;display:inline-block">⬇️ MP3 herunterladen</a>'+
+      '</div>';
+    addNotif('ElevenLabs Music','Background Music MP3 fertig — lizenzfrei für YouTube','green');
+  }catch(e){
+    resultEl.innerHTML='<div class="alert alert-red"><span>❌</span><span>'+e.message+'</span></div>';
+    addNotif('Musik Fehler',e.message,'red');
+  }
   setStat('AKTIV');
 }
 
