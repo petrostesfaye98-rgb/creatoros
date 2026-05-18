@@ -2251,7 +2251,7 @@ async function runPlatformEngine(){
     document.getElementById('yt-voice').textContent='Generiere...';
 
     const ytScript=await claude(
-      'Schreibe ein YouTube Script für Kanal "'+kanal+'".\nThema: "'+topic+'"\nLänge: 2:30-3:00 Minuten (ca. 400-450 Wörter gesprochen).\n'+langInstr+'\n\nFormat:\n[0:00-0:08] HOOK: ...\n[0:08-0:20] Szene 1: ...\n[0:20-0:35] Szene 2: ...\n... (jede Szene ca. 10-15 Sek)\n[2:20-2:30] OUTRO: ...\n\nJede Szene bekommt einen Zeitstempel. Das Script ist direkt als Voiceover lesbar.'+dnaCtx+profilCtx,
+      'Schreibe ein YouTube Script für Kanal "'+kanal+'".\nThema: "'+topic+'"\nLänge: 4:45-5:00 Minuten (ca. 700-750 Wörter gesprochen).\n'+langInstr+'\n\nFormat:\n[0:00-0:08] HOOK: ...\n[0:08-0:30] Setup: ...\n[0:30-1:30] Punkt 1: ...\n[1:30-2:30] Punkt 2: ...\n[2:30-3:30] Punkt 3: ...\n[3:30-4:30] Wendepunkt: ...\n[4:30-5:00] CTA: ...\n\nJede Szene bekommt einen Zeitstempel. Das Script ist direkt als Voiceover lesbar.'+dnaCtx+profilCtx,
       'Du bist der Ghostwriter von "'+kanal+'". Scripts klingen immer nach dem Creator, nie nach KI. Motivierend, direkt, keine Floskeln.'
     );
     document.getElementById('yt-script').textContent=ytScript;
@@ -2278,7 +2278,7 @@ async function runPlatformEngine(){
 
     // Bildprompts YouTube
     const ytPrompts=await claudeJSON(
-      'Erstelle 10 Bildprompts für Kling AI / Google Flow.\nVideo: "'+topic+'" für Kanal "'+kanal+'"\nStil: Cinematic, dark aesthetic, motivational, faceless\nJede Szene ca. 15-18 Sekunden bei 2:30 Min Video.\n\nNUR JSON:\n{"prompts":[{"scene":1,"timestamp":"0:00-0:15","visual":"Was man sieht","prompt":"Vollständiger Kling/Flow Prompt auf Englisch","mood":"Stimmung"},{"scene":2,...}]}',
+      'Erstelle 15 Bildprompts für Kling AI / Google Flow.\nVideo: "'+topic+'" für Kanal "'+kanal+'"\nStil: Cinematic, dark aesthetic, motivational, faceless\nJede Szene ca. 18-20 Sekunden bei 5 Min Video.\n\nNUR JSON:\n{"prompts":[{"scene":1,"timestamp":"0:00-0:20","visual":"Was man sieht","prompt":"Vollständiger Kling/Flow Prompt auf Englisch","mood":"Stimmung"},{"scene":2,...}]}',
       'Video Director. NUR JSON. Prompts auf Englisch für KI-Video-Tools.'
     );
     if(ytPrompts&&ytPrompts.prompts){
@@ -2434,34 +2434,158 @@ function processVideoFile(f){
 
 async function analyzeVideo(){
   if(!videoFile){alert('Bitte zuerst ein Video hochladen');return;}
+  if(!S.yt){alert('YouTube/Google API Key im Setup eingeben');return;}
   setStat('ANALYSIERT...');
   document.getElementById('video-result').style.display='block';
-  document.getElementById('video-overview').innerHTML='<div class="ai-box loading">Video wird analysiert...</div>';
+  document.getElementById('video-overview').innerHTML='<div class="ai-box loading">Video wird zu Google gesendet... (kann 1-2 Min dauern)</div>';
 
-  // Simulate analysis with Claude based on file metadata
-  // In production: use Google Video Intelligence API
   const fileName=videoFile.name;
   const fileSize=(videoFile.size/1024/1024).toFixed(1);
-  const analyzeStyle=document.getElementById('va-style').checked;
 
-  const analysis=await claude(
-    'Analysiere dieses Video basierend auf den Metadaten:\nDateiname: "'+fileName+'"\nGröße: '+fileSize+' MB\nKanal: The Silent Grind (Motivation/Disziplin)\n\nBasierend auf Kanal-DNA und typischen Videos dieser Nische:\n1. Schätze die Videolänge basierend auf Dateigröße\n2. Gib Empfehlungen für das nächste Video\n3. Analysiere was gut laufen könnte\n4. Schlage 3 konkrete Verbesserungen vor\n5. Generiere ein Thema für Video 2 das gut auf dieses aufbaut\n\nAuf Deutsch, direkt und konkret.'+getDNAPrompt(),
-    'YouTube Video Analyst für Motivation/Disziplin Kanäle.'
-  );
+  try {
+    // Step 1: Convert video to base64
+    document.getElementById('video-overview').innerHTML='<div class="ai-box loading">Video wird vorbereitet...</div>';
+    const base64Video = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(videoFile);
+    });
 
-  document.getElementById('video-overview').innerHTML=
-    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">'+
-    '<div class="stat blue"><div class="stat-label">Datei</div><div class="stat-val" style="font-size:14px">'+fileSize+'MB</div></div>'+
-    '<div class="stat green"><div class="stat-label">Kanal</div><div class="stat-val" style="font-size:12px">Silent Grind</div></div>'+
-    '<div class="stat yellow"><div class="stat-label">Format</div><div class="stat-val" style="font-size:14px">'+fileName.split('.').pop().toUpperCase()+'</div></div>'+
-    '</div>';
+    // Step 2: Send to Google Video Intelligence API
+    document.getElementById('video-overview').innerHTML='<div class="ai-box loading">Google Video Intelligence analysiert... bitte warten</div>';
 
-  document.getElementById('video-scenes').innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px">Szenen-Analyse benötigt Google Video Intelligence API — nach Aktivierung automatisch verfügbar.</div>';
-  document.getElementById('video-transcript').textContent='Transkription benötigt Google Speech-to-Text API.';
-  document.getElementById('video-recommendations').textContent=analysis;
+    const features = ['SHOT_CHANGE_DETECTION', 'LABEL_DETECTION'];
+    if(document.getElementById('va-speech').checked) features.push('SPEECH_TRANSCRIPTION');
+    if(document.getElementById('va-objects').checked) features.push('OBJECT_TRACKING');
 
-  videoAnalysisResult={fileName,analysis};
-  addNotif('Video analysiert',fileName,'green');
+    const requestBody = {
+      inputContent: base64Video,
+      features: features,
+      videoContext: {
+        speechTranscriptionConfig: {
+          languageCode: 'en-US',
+          enableAutomaticPunctuation: true
+        }
+      }
+    };
+
+    const response = await fetch(
+      `https://videointelligence.googleapis.com/v1/videos:annotate?key=${S.yt}`,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(requestBody)
+      }
+    );
+
+    const operationData = await response.json();
+
+    if(operationData.error){
+      throw new Error(operationData.error.message);
+    }
+
+    // Step 3: Poll for results
+    const operationName = operationData.name;
+    let result = null;
+    let attempts = 0;
+
+    document.getElementById('video-overview').innerHTML='<div class="ai-box loading">Analyse läuft... (0%)</div>';
+
+    while(attempts < 30){
+      await new Promise(r => setTimeout(r, 4000));
+      attempts++;
+
+      const pollResponse = await fetch(
+        `https://videointelligence.googleapis.com/v1/${operationName}?key=${S.yt}`
+      );
+      const pollData = await pollResponse.json();
+
+      if(pollData.metadata?.progressPercent){
+        document.getElementById('video-overview').innerHTML=`<div class="ai-box loading">Analyse läuft... (${pollData.metadata.progressPercent}%)</div>`;
+      }
+
+      if(pollData.done){
+        result = pollData.response;
+        break;
+      }
+    }
+
+    if(!result) throw new Error('Timeout — Video zu groß oder API-Fehler');
+
+    // Step 4: Parse results
+    const annotation = result.annotationResults?.[0] || {};
+
+    // Shot changes = Szenen
+    const shots = annotation.shotAnnotations || [];
+    const videoDuration = shots.length > 0
+      ? parseFloat(shots[shots.length-1].endTimeOffset?.replace('s','') || 0)
+      : parseFloat(fileSize) * 8; // rough estimate
+
+    const minutes = Math.floor(videoDuration / 60);
+    const seconds = Math.round(videoDuration % 60);
+    const durationStr = `${minutes}:${seconds.toString().padStart(2,'0')}`;
+
+    // Labels
+    const labels = (annotation.segmentLabelAnnotations || [])
+      .sort((a,b) => (b.segments?.[0]?.confidence||0) - (a.segments?.[0]?.confidence||0))
+      .slice(0, 8)
+      .map(l => l.entity?.description || '');
+
+    // Transcript
+    const transcriptParts = (annotation.speechTranscriptions || [])
+      .flatMap(t => t.alternatives?.[0]?.words || [])
+      .map(w => w.word)
+      .join(' ');
+
+    const transcript = transcriptParts || 'Kein gesprochener Text erkannt';
+    const wordCount = transcriptParts.split(' ').filter(Boolean).length;
+
+    // Display results
+    document.getElementById('video-overview').innerHTML=
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">'+
+      `<div class="stat blue"><div class="stat-label">Länge</div><div class="stat-val" style="font-size:20px">${durationStr}</div><div class="stat-sub">Min:Sek</div></div>`+
+      `<div class="stat green"><div class="stat-label">Szenen</div><div class="stat-val" style="font-size:20px">${shots.length}</div><div class="stat-sub">Schnitte</div></div>`+
+      `<div class="stat yellow"><div class="stat-label">Wörter</div><div class="stat-val" style="font-size:20px">${wordCount}</div><div class="stat-sub">gesprochen</div></div>`+
+      `<div class="stat red"><div class="stat-label">Pacing</div><div class="stat-val" style="font-size:14px;margin-top:6px">${shots.length > 0 ? (videoDuration/shots.length).toFixed(1)+'s' : '—'}</div><div class="stat-sub">pro Szene</div></div>`+
+      '</div>'+
+      `<div style="margin-bottom:8px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:4px">ERKANNTE THEMEN</div><div style="display:flex;flex-wrap:wrap;gap:4px">${labels.map(l=>`<span class="badge b-blue">${l}</span>`).join('')}</div></div>`;
+
+    // Szenen
+    document.getElementById('video-scenes').innerHTML = shots.slice(0,10).map((s,i) => {
+      const start = parseFloat(s.startTimeOffset?.replace('s','') || 0);
+      const end = parseFloat(s.endTimeOffset?.replace('s','') || 0);
+      const dur = (end - start).toFixed(1);
+      const startStr = `${Math.floor(start/60)}:${Math.round(start%60).toString().padStart(2,'0')}`;
+      const endStr = `${Math.floor(end/60)}:${Math.round(end%60).toString().padStart(2,'0')}`;
+      return `<div style="padding:6px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--red);min-width:30px">#${i+1}</span>
+        <span style="font-size:11px;color:var(--muted)">${startStr} → ${endStr}</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--yellow)">${dur}s</span>
+      </div>`;
+    }).join('') + (shots.length > 10 ? `<div style="font-size:11px;color:var(--muted);padding:6px 0">+ ${shots.length-10} weitere Szenen</div>` : '');
+
+    // Transcript
+    document.getElementById('video-transcript').textContent = transcript.substring(0, 500) + (transcript.length > 500 ? '...' : '');
+
+    // Claude Analyse basierend auf echten Daten
+    const claudeAnalysis = await claude(
+      `Analysiere dieses YouTube Video mit echten Daten:\nDatei: "${fileName}"\nLänge: ${durationStr} Min\nAnzahl Szenen/Schnitte: ${shots.length}\nDurchschnittliche Szenenlänge: ${shots.length > 0 ? (videoDuration/shots.length).toFixed(1) : '?'} Sekunden\nErkannte Themen: ${labels.join(', ')}\nGesprochene Wörter: ${wordCount}\nTranskript Anfang: "${transcript.substring(0, 200)}"\nKanal: The Silent Grind (Motivation/Disziplin, max 5 Min Videos)\n\nGib konkrete Empfehlungen:\n1. Ist das Pacing gut? (Szenenanzahl für die Länge)\n2. Retention-Risiken\n3. Was für Video 2 besser machen\n4. Thema-Vorschlag für Video 2\n\nDirekt, auf Deutsch.` + getDNAPrompt(),
+      'YouTube Video Analyst. Nutze die echten API-Daten für präzise Empfehlungen.'
+    );
+
+    document.getElementById('video-recommendations').textContent = claudeAnalysis;
+    videoAnalysisResult = {fileName, durationStr, shots: shots.length, wordCount, labels, analysis: claudeAnalysis};
+
+    addNotif('Video analysiert (Google API)', `${durationStr} Min · ${shots.length} Szenen · ${wordCount} Wörter`, 'green');
+    trackCost('claude', shots.length * 0.001, 'Video Intelligence');
+
+  } catch(err) {
+    document.getElementById('video-overview').innerHTML = `<div class="alert alert-red"><span>❌</span><span>Fehler: ${err.message}</span></div>`;
+    document.getElementById('video-recommendations').textContent = 'API-Fehler. Prüfe ob Cloud Video Intelligence API aktiviert ist.';
+    addNotif('Fehler', err.message, 'red');
+  }
+
   setStat('AKTIV');
 }
 
