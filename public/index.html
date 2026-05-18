@@ -2505,6 +2505,7 @@ async function genBildprompts(){
   const topic=document.getElementById('plat-topic').value.trim()||currentPlatData.topic||'';
   const kanal=document.getElementById('plat-kanal')?.value||'The Silent Grind';
   const clipLen=parseInt(document.getElementById('plat-clip-len')?.value||'8');
+  const styleLock=getStyleLock();
   const numPrompts=Math.ceil(180/clipLen);
   if(!topic){alert('Thema eingeben');return;}
   setStat('GENERIERT PROMPTS...');
@@ -2513,13 +2514,62 @@ async function genBildprompts(){
   const infoEl=document.getElementById('yt-prompts-info');
   const promptsEl=document.getElementById('yt-prompts');
   if(infoEl) infoEl.textContent=numPrompts+' Prompts x '+clipLen+' Sek = '+Math.round(numPrompts*clipLen/60)+' Min | Klick zum Kopieren';
-  promptsEl.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Generiere '+numPrompts+' Bildprompts...</div>';
-  const j=await claudeJSON(
-    'Create EXACTLY '+numPrompts+' image prompts for Kling AI / Google Flow.\nVideo: "'+topic+'" for "'+kanal+'"\nStyle: Cinematic, dark, motivational, faceless, no text overlays\nEach scene: '+clipLen+' seconds\n\nJSON ONLY, no markdown:\n{"prompts":[{"scene":1,"timestamp":"0:00-0:'+String(clipLen).padStart(2,'0')+'","visual":"Description","prompt":"Full cinematic English prompt for Kling/Flow","mood":"one word"}]}',
-    'Video Director. JSON ONLY.'
-  );
-  if(j&&j.prompts&&j.prompts.length>0){
-    promptsEl.innerHTML=j.prompts.map(function(p,i){
+  promptsEl.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Generiere '+numPrompts+' Bildprompts in Batches...</div>';
+
+  // Split into batches of 5-6 to avoid JSON errors
+  const batchSize=5;
+  const allPrompts=[];
+  const totalBatches=Math.ceil(numPrompts/batchSize);
+
+  for(var batch=0;batch<totalBatches;batch++){
+    var startScene=batch*batchSize+1;
+    var endScene=Math.min((batch+1)*batchSize,numPrompts);
+    var batchCount=endScene-startScene+1;
+    var startSec=(startScene-1)*clipLen;
+    var endSec=endScene*clipLen;
+
+    promptsEl.innerHTML='<div style="font-size:12px;color:var(--muted)"><span class="spin"></span>Batch '+(batch+1)+'/'+totalBatches+' (Szenen '+startScene+'-'+endScene+')...</div>';
+
+    var raw=await claude(
+      'Create EXACTLY '+batchCount+' image prompts for scenes '+startScene+' to '+endScene+' of a YouTube video.\nVideo: "'+topic+'" for "'+kanal+'"\nStyle lock (apply to ALL): '+styleLock+'\nEach scene: '+clipLen+' seconds\nTime range: '+startSec+'s to '+endSec+'s\n\nReturn ONLY a JSON array, no other text:\n[{"scene":'+startScene+',"timestamp":"'+formatTime(startSec)+'-'+formatTime(startSec+clipLen)+'","visual":"what you see","prompt":"full cinematic English prompt + style lock","mood":"one word"},...]',
+      'Video Director. Return ONLY a JSON array starting with [ and ending with ]. No markdown, no explanation.'
+    );
+
+    // Parse with fallback
+    try{
+      var cleaned=raw.trim();
+      // Extract JSON array
+      var arrStart=cleaned.indexOf('[');
+      var arrEnd=cleaned.lastIndexOf(']');
+      if(arrStart!==-1&&arrEnd!==-1){
+        var jsonStr=cleaned.substring(arrStart,arrEnd+1);
+        var parsed=JSON.parse(jsonStr);
+        allPrompts.push(...parsed);
+      }
+    }catch(e){
+      console.warn('Batch '+batch+' parse error:',e.message);
+      // Add placeholder
+      for(var pi=startScene;pi<=endScene;pi++){
+        allPrompts.push({
+          scene:pi,
+          timestamp:formatTime((pi-1)*clipLen)+'-'+formatTime(pi*clipLen),
+          visual:'Scene '+pi,
+          prompt:'Dark cinematic scene '+pi+', '+topic+', '+styleLock,
+          mood:'cinematic'
+        });
+      }
+    }
+
+    // Small delay between batches
+    if(batch<totalBatches-1) await new Promise(r=>setTimeout(r,500));
+  }
+
+  // Display all prompts
+  if(allPrompts.length>0){
+    promptsEl.innerHTML=
+      '<div style="background:var(--surface);border:1px solid var(--yellow);border-radius:4px;padding:8px;margin-bottom:10px;font-size:11px">'+
+      '<span style="color:var(--yellow)">🎨 STYLE LOCK</span> — '+styleLock.substring(0,80)+'...</div>'+
+      allPrompts.map(function(p,i){
         var scene=p.scene||i+1;
         var ts=p.timestamp||'';
         var mood=p.mood||'';
@@ -2527,25 +2577,31 @@ async function genBildprompts(){
         var prompt=p.prompt||'';
         var safePrompt=prompt.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
         var klingBtn=(S.kling&&S.klingSecret)?
-          '<button class="btn btn-red" style="font-size:9px;padding:3px 8px;margin-top:4px" onclick="genKlingVideo(this,\''+safePrompt+'\','+i+','+clipLen+')">🎬 Kling Video</button>':
-          '<span style="font-size:9px;color:var(--muted)">Kling Keys eingeben</span>';
+          '<button class="btn btn-red" style="font-size:9px;padding:3px 8px" onclick="genKlingVideo(this,\''+safePrompt+'\','+i+','+clipLen+')">🎬 Kling</button>':
+          '<span style="font-size:9px;color:var(--muted)">Kling Keys → Setup</span>';
         return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px">'+
           '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
           '<span style="font-family:var(--mono);font-size:10px;color:var(--red)">SCENE '+scene+' ['+ts+'] '+clipLen+'s</span>'+
           '<span style="font-size:10px;color:var(--muted)">'+mood+'</span></div>'+
           '<div style="font-size:11px;color:#aaa;margin-bottom:4px">'+visual+'</div>'+
           '<div style="background:#0D0D0D;border-left:3px solid var(--green);padding:8px;font-family:var(--mono);font-size:10px;color:#ccc;cursor:pointer;border-radius:0 3px 3px 0;line-height:1.5;margin-bottom:6px" onclick="navigator.clipboard.writeText(this.textContent);this.style.borderLeftColor=\'var(--yellow)\';setTimeout(()=>this.style.borderLeftColor=\'var(--green)\',1500)">'+prompt+'</div>'+
-          '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+klingBtn+
+          '<div style="display:flex;gap:6px;align-items:center">'+klingBtn+
           '<div id="kling-result-'+i+'" style="font-size:10px;color:var(--green);margin-left:8px"></div>'+
-          '</div>'+
-        '</div>';
+          '</div></div>';
       }).join('');
-    addNotif('Bildprompts',j.prompts.length+' Prompts x '+clipLen+'s generiert','green');
+    addNotif('Bildprompts',allPrompts.length+' Prompts x '+clipLen+'s — Style Lock aktiv','green');
   }else{
-    promptsEl.innerHTML='<div class="alert alert-red"><span>Fehler — bitte nochmal</span></div>';
+    promptsEl.innerHTML='<div class="alert alert-red"><span>❌</span><span>Fehler — bitte nochmal versuchen</span></div>';
   }
   setStat('AKTIV');
 }
+
+function formatTime(secs){
+  var m=Math.floor(secs/60);
+  var s=secs%60;
+  return m+':'+(s<10?'0':'')+s;
+}
+
 async function checkCompetitors(){
   const topic=document.getElementById('plat-topic').value.trim();
   if(!topic){alert('Thema eingeben');return;}
