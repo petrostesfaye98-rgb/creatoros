@@ -510,10 +510,12 @@ hr.div{border:none;border-top:1px solid var(--border);margin:18px 0;}
         <span id="s-gemini" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
       </div>
       <div class="setup-card">
-        <h3>🎬 Kling AI API Key</h3>
-        <p>Für automatische Video-Generierung aus Bildprompts. Holen: klingai.com → API</p>
-        <div class="input-row"><input class="input-field" id="k-kling" type="password" placeholder="kling-..."><button class="btn btn-red" onclick="saveKey('kling','k-kling','s-kling')">Speichern</button></div>
+        <h3>🎬 Kling AI API Keys</h3>
+        <p>Für automatische Video-Generierung. Access Key + Secret Key von klingai.com → API Plattform</p>
+        <div class="input-row" style="margin-bottom:6px"><input class="input-field" id="k-kling" type="password" placeholder="Access Key..."><button class="btn btn-red" onclick="saveKey('kling','k-kling','s-kling')">Speichern</button></div>
         <span id="s-kling" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
+        <div class="input-row" style="margin-top:8px"><input class="input-field" id="k-kling-secret" type="password" placeholder="Secret Key..."><button class="btn btn-red" onclick="saveKey('klingSecret','k-kling-secret','s-kling-secret')">Speichern</button></div>
+        <span id="s-kling-secret" style="font-family:var(--mono);font-size:10px;color:var(--muted)">— nicht gespeichert</span>
       </div>
     </div>
   </div>
@@ -1764,7 +1766,8 @@ const S = {
   voiceId: localStorage.getItem('cos_voiceId')||'21m00Tcm4TlvDq8ikWAM',
   openai: localStorage.getItem('cos_openai')||'',
   gemini: localStorage.getItem('cos_gemini')||'',
-  kling: localStorage.getItem('cos_kling')||''
+  kling: localStorage.getItem('cos_kling')||'',
+  klingSecret: localStorage.getItem('cos_klingSecret')||''
 };
 
 let abData = {a:null,b:null};
@@ -1778,7 +1781,8 @@ window.onload = () => {
   if(S.el){document.getElementById('k-el').value='';setStatus('s-el','✓ gespeichert',true);}
   if(S.openai){document.getElementById('k-openai').value='';setStatus('s-openai','✓ gespeichert',true);}
   if(S.gemini){document.getElementById('k-gemini').value='';setStatus('s-gemini','✓ gespeichert',true);}
-  if(S.kling){document.getElementById('k-kling').value='';setStatus('s-kling','✓ gespeichert',true);}
+  if(S.kling){document.getElementById('k-kling').value='';setStatus('s-kling','✓ Access Key gespeichert',true);}
+  if(S.klingSecret){document.getElementById('k-kling-secret').value='';setStatus('s-kling-secret','✓ Secret Key gespeichert',true);}
   if(S.voiceId){document.getElementById('k-voice-id').value=S.voiceId;}
   updateAPIStatus();
   loadProfil();
@@ -2516,19 +2520,26 @@ async function genBildprompts(){
   );
   if(j&&j.prompts&&j.prompts.length>0){
     promptsEl.innerHTML=j.prompts.map(function(p,i){
-      var scene=p.scene||i+1;
-      var ts=p.timestamp||'';
-      var mood=p.mood||'';
-      var visual=p.visual||'';
-      var prompt=p.prompt||'';
-      return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px">'+
-        '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
-        '<span style="font-family:var(--mono);font-size:10px;color:var(--red)">SCENE '+scene+' ['+ts+'] '+clipLen+'s</span>'+
-        '<span style="font-size:10px;color:var(--muted)">'+mood+'</span></div>'+
-        '<div style="font-size:11px;color:#aaa;margin-bottom:6px">'+visual+'</div>'+
-        '<div style="background:#0D0D0D;border-left:3px solid var(--green);padding:8px;font-family:var(--mono);font-size:10px;color:#ccc;cursor:pointer;border-radius:0 3px 3px 0;line-height:1.5" onclick="navigator.clipboard.writeText(this.textContent)">'+prompt+'</div>'+
-      '</div>';
-    }).join('');
+        var scene=p.scene||i+1;
+        var ts=p.timestamp||'';
+        var mood=p.mood||'';
+        var visual=p.visual||'';
+        var prompt=p.prompt||'';
+        var safePrompt=prompt.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        var klingBtn=(S.kling&&S.klingSecret)?
+          '<button class="btn btn-red" style="font-size:9px;padding:3px 8px;margin-top:4px" onclick="genKlingVideo(this,\''+safePrompt+'\','+i+','+clipLen+')">🎬 Kling Video</button>':
+          '<span style="font-size:9px;color:var(--muted)">Kling Keys eingeben</span>';
+        return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px">'+
+          '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
+          '<span style="font-family:var(--mono);font-size:10px;color:var(--red)">SCENE '+scene+' ['+ts+'] '+clipLen+'s</span>'+
+          '<span style="font-size:10px;color:var(--muted)">'+mood+'</span></div>'+
+          '<div style="font-size:11px;color:#aaa;margin-bottom:4px">'+visual+'</div>'+
+          '<div style="background:#0D0D0D;border-left:3px solid var(--green);padding:8px;font-family:var(--mono);font-size:10px;color:#ccc;cursor:pointer;border-radius:0 3px 3px 0;line-height:1.5;margin-bottom:6px" onclick="navigator.clipboard.writeText(this.textContent);this.style.borderLeftColor=\'var(--yellow)\';setTimeout(()=>this.style.borderLeftColor=\'var(--green)\',1500)">'+prompt+'</div>'+
+          '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+klingBtn+
+          '<div id="kling-result-'+i+'" style="font-size:10px;color:var(--green);margin-left:8px"></div>'+
+          '</div>'+
+        '</div>';
+      }).join('');
     addNotif('Bildprompts',j.prompts.length+' Prompts x '+clipLen+'s generiert','green');
   }else{
     promptsEl.innerHTML='<div class="alert alert-red"><span>Fehler — bitte nochmal</span></div>';
@@ -2743,6 +2754,91 @@ async function genBildprompts(){
     promptsEl.innerHTML='<div class="alert alert-red"><span>❌</span><span>Fehler — nochmal versuchen</span></div>';
   }
   setStat('AKTIV');
+}
+
+// ═══════════════════════════════════════
+// KLING VIDEO GENERIERUNG
+// ═══════════════════════════════════════
+async function genKlingVideo(btn, prompt, idx, duration){
+  if(!S.kling||!S.klingSecret){alert('Kling Access Key + Secret Key im Setup eingeben');return;}
+  var resultEl=document.getElementById('kling-result-'+idx);
+  if(!resultEl) return;
+  btn.disabled=true;
+  btn.textContent='⏳ Generiert...';
+  resultEl.textContent='';
+
+  try{
+    // Generate JWT token from Access + Secret Key
+    var now=Math.floor(Date.now()/1000);
+    var header=btoa(JSON.stringify({alg:'HS256',typ:'JWT'})).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+    var payload=btoa(JSON.stringify({iss:S.kling,exp:now+1800,nbf:now-5})).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+
+    // Create task
+    var r=await fetch('https://api.klingai.com/v1/videos/text2video',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+S.kling+':'+S.klingSecret
+      },
+      body:JSON.stringify({
+        model_name:'kling-v2-master',
+        prompt:prompt,
+        negative_prompt:'text, watermark, faces, people, low quality',
+        cfg_scale:parseFloat(document.getElementById('kling-creativity')?.value||'0.5'),
+        mode:'pro',
+        duration:String(duration),
+        aspect_ratio:'16:9'
+      })
+    });
+
+    var d=await r.json();
+
+    if(d.code!==0){
+      throw new Error(d.message||'Kling API Fehler: '+d.code);
+    }
+
+    var taskId=d.data?.task_id;
+    if(!taskId) throw new Error('Keine Task ID erhalten');
+
+    resultEl.textContent='⏳ Task ID: '+taskId+' — polling...';
+    btn.textContent='⏳ Warte auf Video...';
+
+    // Poll for result
+    var attempts=0;
+    var videoUrl=null;
+    while(attempts<30){
+      await new Promise(res=>setTimeout(res,5000));
+      attempts++;
+
+      var pollR=await fetch('https://api.klingai.com/v1/videos/text2video/'+taskId,{
+        headers:{'Authorization':'Bearer '+S.kling+':'+S.klingSecret}
+      });
+      var pollD=await pollR.json();
+      var status=pollD.data?.task_status;
+      resultEl.textContent='Status: '+status+' ('+attempts*5+'s)';
+
+      if(status==='succeed'){
+        videoUrl=pollD.data?.task_result?.videos?.[0]?.url;
+        break;
+      }
+      if(status==='failed'){
+        throw new Error('Kling Generierung fehlgeschlagen');
+      }
+    }
+
+    if(videoUrl){
+      resultEl.innerHTML='<a href="'+videoUrl+'" target="_blank" style="color:var(--green);text-decoration:none">✅ Video fertig — klicken zum öffnen</a> '+
+        '<a href="'+videoUrl+'" download="scene_'+idx+'.mp4" style="color:var(--blue);text-decoration:none;margin-left:8px">⬇️ Download</a>';
+      addNotif('Kling Video','Scene '+(idx+1)+' fertig generiert','green');
+    }else{
+      throw new Error('Timeout — kein Video erhalten');
+    }
+  }catch(e){
+    resultEl.innerHTML='<span style="color:var(--red)">❌ '+e.message+'</span>';
+    addNotif('Kling Fehler',e.message,'red');
+  }
+  btn.disabled=false;
+  btn.textContent='🎬 Kling Video';
 }
 
 // ═══════════════════════════════════════
