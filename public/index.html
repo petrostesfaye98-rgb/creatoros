@@ -1165,7 +1165,7 @@ async function runEngine(){
   const comp=compAnalysis?'\n\nCOMPETITOR ANALYSIS:\n'+compAnalysis.substring(0,500):'';
   const langStr=lang==='de'?'Write in German.':lang==='both'?'English main + German second.':'Write in English.';
   const voiceTags='ONLY English tags: [thoughtful],[serious],[motivated],[energetic],[calm]. CAPS emphasis. ... pauses. NO German.';
-  const words=mins*140;
+  const words=mins*150; // 150 WPM = ElevenLabs standard
   const ft=function(s){return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;};
 
   if(doYT){
@@ -1174,8 +1174,9 @@ async function runEngine(){
     scriptEl.textContent='Generating...';scriptEl.className='ai-box loading';
     voiceEl.textContent='Generating...';voiceEl.className='ai-box loading';
 
-    var prompt='Write YouTube script for "'+kanal+'".\nTopic: "'+topic+'"\nLength: EXACTLY '+mins+' min = EXACTLY '+words+' words.\n'+langStr+'\n\nTimestamps:\n[0:00-0:08] HOOK\n[0:08-0:30] SETUP\n[0:30-'+ft(Math.floor(mins/3*60))+'] POINT 1\n['+ft(Math.floor(mins/3*60))+'-'+ft(Math.floor(mins*2/3*60))+'] POINT 2\n['+ft(Math.floor(mins*2/3*60))+'-'+ft(Math.floor(mins*0.85*60))+'] POINT 3\n['+ft(Math.floor(mins*0.85*60))+'-'+ft(mins*60)+'] CTA\n\nEnd: **Word count: XXX | Runtime: X:XX**'+dna+prof+comp;
-    var script=await aiCall(prompt,'You are ghostwriter for "'+kanal+'". CRITICAL RULE: The script MUST be EXACTLY '+words+' words. Count every word before finishing. If under '+words+' words, expand. If over, trim. EXACTLY '+words+' words. Never AI-sounding. Direct human voice.');
+    var cta=DNA&&DNA.cta?DNA.cta:'If this resonates — subscribe to '+kanal+'. New videos every week.';
+    var prompt='Write YouTube script for "'+kanal+'".\nTopic: "'+topic+'"\nLength: EXACTLY '+mins+' min = EXACTLY '+words+' words.\n'+langStr+'\n\nTimestamps:\n[0:00-0:08] HOOK\n[0:08-0:30] SETUP\n[0:30-'+ft(Math.floor(mins/3*60))+'] POINT 1\n['+ft(Math.floor(mins/3*60))+'-'+ft(Math.floor(mins*2/3*60))+'] POINT 2\n['+ft(Math.floor(mins*2/3*60))+'-'+ft(Math.floor(mins*0.85*60))+'] POINT 3\n['+ft(Math.floor(mins*0.85*60))+'-'+ft(mins*60)+'] CTA\n\nCTA: End naturally with subscribe CTA for "'+kanal+'". Direct, not begging. Like: "'+cta+'"\n\nEnd: **Word count: XXX | Runtime: X:XX**'+dna+prof+comp;
+    var script=await aiCall(prompt,'Ghostwriter for "'+kanal+'". CRITICAL: Script MUST be '+words+' words ('+mins+' min x 150 WPM). Count every word. Expand if under. Never deliver fewer than '+words+' words. EXACTLY '+words+' words. Never AI-sounding. Direct human voice.');
     currentScript=script;
     scriptEl.className='ai-box';scriptEl.style.whiteSpace='pre-wrap';scriptEl.textContent=script;
 
